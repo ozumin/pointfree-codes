@@ -15,6 +15,45 @@ func isPrime(_ p: Int) -> Bool {
 struct AppState {
     var targetNumber: Int = 0
     var favoritePrimes: [Int] = []
+    var loggedInUser: User? = nil
+    var activityFeed: [Activity] = []
+
+    struct Activity {
+        let timestamp: Date
+        let type: ActivityType
+
+        enum ActivityType {
+            case addedFavoritePrime(Int)
+            case removedFavoritePrime(Int)
+        }
+    }
+
+    struct User {
+        let id: Int
+        let name: String
+        let bio: String
+    }
+}
+
+/// お気に入り一覧で使うstate
+struct FavoritePrimesState {
+
+    var favoritePrimes: [Int]
+    var activityFeed: [AppState.Activity]
+}
+
+extension AppState {
+
+    /// これによってpullBack()で使うkeyPathが取得できる
+    var favoritePrimesState: FavoritePrimesState {
+        get {
+            .init(favoritePrimes: favoritePrimes, activityFeed: activityFeed)
+        }
+        set {
+            favoritePrimes = newValue.favoritePrimes
+            activityFeed = newValue.activityFeed
+        }
+    }
 }
 
 /// カウンターでのアクション
@@ -41,27 +80,80 @@ enum AppAction {
     case favorite(FavoriteAction)
 }
 
-/// アプリで使う reducer
-func appReducer(value: inout AppState, action: AppAction) -> Void {
+/// CounterViewでのreducer
+func counterReducer(value: inout Int, action: AppAction) -> Void {
     switch action {
     case .counter(let counterAction):
         switch counterAction {
         case .decreaseNumber:
-            value.targetNumber -= 1
+            value -= 1
         case .increaseNumber:
-            value.targetNumber += 1
+            value += 1
         }
+    default:
+        break
+    }
+}
+
+/// PrimeResultViewでのreducer
+func primeResultReducer(value: inout AppState, action: AppAction) -> Void {
+    switch action {
     case .primeResult(let primeResultAction):
         switch primeResultAction {
         case .addToFavorite:
             value.favoritePrimes.append(value.targetNumber)
+            value.activityFeed.append(.init(timestamp: .now, type: .addedFavoritePrime(value.targetNumber)))
         case .removeFromFavorite:
             value.favoritePrimes.removeAll(where: { $0 == value.targetNumber })
+            value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(value.targetNumber)))
         }
+    default:
+        break
+    }
+}
+
+/// FavoriteViewで使うreducer
+func favoriteReducer(value: inout FavoritePrimesState, action: AppAction) -> Void {
+    switch action {
     case .favorite(let favoriteAction):
         switch favoriteAction {
         case .removeFromFavorite(let number):
             value.favoritePrimes.removeAll(where: { $0 == number })
+            value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(number)))
+
+        }
+    default:
+        break
+    }
+}
+
+let _appReducer = combine(
+    pullBack(counterReducer, value: \.targetNumber),
+    primeResultReducer,
+    pullBack(favoriteReducer, value: \.favoritePrimesState)
+)
+
+/// アプリで使うreducer
+let appReducer = pullBack(_appReducer, value: \.self)
+
+/// Reducerの必要な部分だけ取り出す関数
+/// GlobalValueの一部をLocalValueとしてreducerに渡している
+func pullBack<LocalValue, GlobalValue, Action>(
+    _ localReducer: @escaping (inout LocalValue, Action) -> Void,
+    value: WritableKeyPath<GlobalValue, LocalValue>
+) -> (inout GlobalValue, Action) -> Void {
+    return { globalValue, action in
+        localReducer(&globalValue[keyPath: value], action)
+    }
+}
+
+/// Reducerをまとめ上げる関数
+func combine<Value, Action>(
+    _ reducers: (inout Value, Action) -> Void...
+) -> (inout Value, Action) -> Void {
+    return { value, action in
+        for reducer in reducers {
+            reducer(&value, action)
         }
     }
 }
@@ -112,7 +204,7 @@ struct CounterView: View {
             Button {
                 // TODO
             } label: {
-                Text("What is the 0th prime?")
+                Text("What is the \(store.value.targetNumber)th prime?")
             }
             Spacer()
         }
