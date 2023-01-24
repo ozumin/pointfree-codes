@@ -78,72 +78,94 @@ enum AppAction {
     case counter(CounterAction)
     case primeResult(PrimeResultAction)
     case favorite(FavoriteAction)
+
+    /// enumでKeyPathを取得するためのワークアラウンド
+    var counter: CounterAction? {
+        get {
+            guard case let .counter(value) = self else { return nil }
+            return value
+        }
+        set {
+            guard case .counter = self, let newValue = newValue else { return }
+            self = .counter(newValue)
+        }
+    }
+
+    /// enumでKeyPathを取得するためのワークアラウンド
+    var primeResult: PrimeResultAction? {
+        get {
+            guard case let .primeResult(value) = self else { return nil }
+            return value
+        }
+        set {
+            guard case .primeResult = self, let newValue = newValue else { return }
+            self = .primeResult(newValue)
+        }
+    }
+
+    /// enumでKeyPathを取得するためのワークアラウンド
+    var favorite: FavoriteAction? {
+        get {
+            guard case let .favorite(value) = self else { return nil }
+            return value
+        }
+        set {
+            guard case .favorite = self, let newValue = newValue else { return }
+            self = .favorite(newValue)
+        }
+    }
 }
 
 /// CounterViewでのreducer
-func counterReducer(value: inout Int, action: AppAction) -> Void {
+func counterReducer(value: inout Int, action: CounterAction) -> Void {
     switch action {
-    case .counter(let counterAction):
-        switch counterAction {
-        case .decreaseNumber:
-            value -= 1
-        case .increaseNumber:
-            value += 1
-        }
-    default:
-        break
+    case .decreaseNumber:
+        value -= 1
+    case .increaseNumber:
+        value += 1
     }
 }
 
 /// PrimeResultViewでのreducer
-func primeResultReducer(value: inout AppState, action: AppAction) -> Void {
+func primeResultReducer(value: inout AppState, action: PrimeResultAction) -> Void {
     switch action {
-    case .primeResult(let primeResultAction):
-        switch primeResultAction {
-        case .addToFavorite:
-            value.favoritePrimes.append(value.targetNumber)
-            value.activityFeed.append(.init(timestamp: .now, type: .addedFavoritePrime(value.targetNumber)))
-        case .removeFromFavorite:
-            value.favoritePrimes.removeAll(where: { $0 == value.targetNumber })
-            value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(value.targetNumber)))
-        }
-    default:
-        break
+    case .addToFavorite:
+        value.favoritePrimes.append(value.targetNumber)
+        value.activityFeed.append(.init(timestamp: .now, type: .addedFavoritePrime(value.targetNumber)))
+    case .removeFromFavorite:
+        value.favoritePrimes.removeAll(where: { $0 == value.targetNumber })
+        value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(value.targetNumber)))
     }
 }
 
 /// FavoriteViewで使うreducer
-func favoriteReducer(value: inout FavoritePrimesState, action: AppAction) -> Void {
+func favoriteReducer(value: inout FavoritePrimesState, action: FavoriteAction) -> Void {
     switch action {
-    case .favorite(let favoriteAction):
-        switch favoriteAction {
-        case .removeFromFavorite(let number):
-            value.favoritePrimes.removeAll(where: { $0 == number })
-            value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(number)))
-
-        }
-    default:
-        break
+    case .removeFromFavorite(let number):
+        value.favoritePrimes.removeAll(where: { $0 == number })
+        value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(number)))
     }
 }
 
-let _appReducer = combine(
-    pullBack(counterReducer, value: \.targetNumber),
-    primeResultReducer,
-    pullBack(favoriteReducer, value: \.favoritePrimesState)
+let _appReducer: (inout AppState, AppAction) -> Void = combine(
+    pullBack(counterReducer, value: \.targetNumber, action: \.counter),
+    pullBack(primeResultReducer, value: \.self, action: \.primeResult),
+    pullBack(favoriteReducer, value: \.favoritePrimesState, action: \.favorite)
 )
 
 /// アプリで使うreducer
-let appReducer = pullBack(_appReducer, value: \.self)
+let appReducer = pullBack(_appReducer, value: \.self, action: \.self)
 
 /// Reducerの必要な部分だけ取り出す関数
-/// GlobalValueの一部をLocalValueとしてreducerに渡している
-func pullBack<LocalValue, GlobalValue, Action>(
-    _ localReducer: @escaping (inout LocalValue, Action) -> Void,
-    value: WritableKeyPath<GlobalValue, LocalValue>
-) -> (inout GlobalValue, Action) -> Void {
-    return { globalValue, action in
-        localReducer(&globalValue[keyPath: value], action)
+/// GlobalValueの一部をLocalValueとして、GlobalActionの一部をLocalActionとしてreducerに渡している
+func pullBack<LocalValue, GlobalValue, GlobalAction, LocalAction>(
+    _ localReducer: @escaping (inout LocalValue, LocalAction) -> Void,
+    value: WritableKeyPath<GlobalValue, LocalValue>,
+    action: WritableKeyPath<GlobalAction, LocalAction?>
+) -> (inout GlobalValue, GlobalAction) -> Void {
+    return { globalValue, globalAction in
+        guard let localAction = globalAction[keyPath: action] else { return }
+        localReducer(&globalValue[keyPath: value], localAction)
     }
 }
 
