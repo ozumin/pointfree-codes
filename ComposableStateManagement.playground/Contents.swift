@@ -126,15 +126,29 @@ func counterReducer(value: inout Int, action: CounterAction) -> Void {
     }
 }
 
+func activityFeed(_ reducer: @escaping (inout AppState, AppAction) -> Void) -> (inout AppState, AppAction) -> Void {
+    { value, action in
+        switch action {
+        case .counter(_):
+            break
+        case .primeResult(.addToFavorite):
+            value.activityFeed.append(.init(timestamp: .now, type: .addedFavoritePrime(value.targetNumber)))
+        case .primeResult(.removeFromFavorite):
+            value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(value.targetNumber)))
+        case let .favorite(.removeFromFavorite(number)):
+            value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(number)))
+        }
+        reducer(&value, action)
+    }
+}
+
 /// PrimeResultViewでのreducer
 func primeResultReducer(value: inout AppState, action: PrimeResultAction) -> Void {
     switch action {
     case .addToFavorite:
         value.favoritePrimes.append(value.targetNumber)
-        value.activityFeed.append(.init(timestamp: .now, type: .addedFavoritePrime(value.targetNumber)))
     case .removeFromFavorite:
         value.favoritePrimes.removeAll(where: { $0 == value.targetNumber })
-        value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(value.targetNumber)))
     }
 }
 
@@ -143,7 +157,6 @@ func favoriteReducer(value: inout FavoritePrimesState, action: FavoriteAction) -
     switch action {
     case .removeFromFavorite(let number):
         value.favoritePrimes.removeAll(where: { $0 == number })
-        value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(number)))
     }
 }
 
@@ -310,4 +323,11 @@ struct ContentView: View {
 }
 
 /// アプリ
-PlaygroundPage.current.setLiveView(ContentView(store: Store<AppState, AppAction>(value: AppState(), reducer: appReducer)))
+PlaygroundPage.current.setLiveView(
+    ContentView(
+        store: Store<AppState, AppAction>(
+            value: AppState(),
+            reducer: activityFeed(appReducer)
+        )
+    )
+)
