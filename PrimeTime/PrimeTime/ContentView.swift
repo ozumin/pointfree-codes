@@ -5,6 +5,10 @@
 //  Created by Mizuo Nagayama on 2023/02/03.
 //
 
+import ComposableArchitecture
+import Counter
+import FavoritePrimes
+import PrimeModal
 import SwiftUI
 
 /// 素数計算用の関数
@@ -41,42 +45,26 @@ struct AppState {
     }
 }
 
-/// お気に入り一覧で使うstate
-struct FavoritePrimesState {
-
-    var favoritePrimes: [Int]
-    var activityFeed: [AppState.Activity]
-}
-
 extension AppState {
 
     /// これによってpullBack()で使うkeyPathが取得できる
     var favoritePrimesState: FavoritePrimesState {
         get {
-            .init(favoritePrimes: favoritePrimes, activityFeed: activityFeed)
+            .init(favoritePrimes: favoritePrimes)
         }
         set {
             favoritePrimes = newValue.favoritePrimes
-            activityFeed = newValue.activityFeed
         }
     }
-}
 
-/// カウンターでのアクション
-enum CounterAction {
-    case increaseNumber
-    case decreaseNumber
-}
-
-/// 素数結果表示時のアクション
-enum PrimeResultAction {
-    case addToFavorite
-    case removeFromFavorite
-}
-
-/// お気に入り一覧でのアクション
-enum FavoriteAction {
-    case removeFromFavorite(Int)
+    var primeModalState: PrimeModalState {
+        get {
+            .init(favoritePrimes: favoritePrimes, targetNumber: targetNumber)
+        }
+        set {
+            favoritePrimes = newValue.favoritePrimes
+        }
+    }
 }
 
 /// アプリ全体のアクション
@@ -122,16 +110,6 @@ enum AppAction {
     }
 }
 
-/// CounterViewでのreducer
-func counterReducer(value: inout Int, action: CounterAction) -> Void {
-    switch action {
-    case .decreaseNumber:
-        value -= 1
-    case .increaseNumber:
-        value += 1
-    }
-}
-
 func activityFeed(_ reducer: @escaping (inout AppState, AppAction) -> Void) -> (inout AppState, AppAction) -> Void {
     { value, action in
         switch action {
@@ -148,72 +126,14 @@ func activityFeed(_ reducer: @escaping (inout AppState, AppAction) -> Void) -> (
     }
 }
 
-/// PrimeResultViewでのreducer
-func primeResultReducer(value: inout AppState, action: PrimeResultAction) -> Void {
-    switch action {
-    case .addToFavorite:
-        value.favoritePrimes.append(value.targetNumber)
-    case .removeFromFavorite:
-        value.favoritePrimes.removeAll(where: { $0 == value.targetNumber })
-    }
-}
-
-/// FavoriteViewで使うreducer
-func favoriteReducer(value: inout FavoritePrimesState, action: FavoriteAction) -> Void {
-    switch action {
-    case .removeFromFavorite(let number):
-        value.favoritePrimes.removeAll(where: { $0 == number })
-    }
-}
-
 let _appReducer: (inout AppState, AppAction) -> Void = combine(
     pullBack(counterReducer, value: \.targetNumber, action: \.counter),
-    pullBack(primeResultReducer, value: \.self, action: \.primeResult),
+    pullBack(primeResultReducer, value: \.primeModalState, action: \.primeResult),
     pullBack(favoriteReducer, value: \.favoritePrimesState, action: \.favorite)
 )
 
 /// アプリで使うreducer
 let appReducer = pullBack(_appReducer, value: \.self, action: \.self)
-
-/// Reducerの必要な部分だけ取り出す関数
-/// GlobalValueの一部をLocalValueとして、GlobalActionの一部をLocalActionとしてreducerに渡している
-func pullBack<LocalValue, GlobalValue, GlobalAction, LocalAction>(
-    _ localReducer: @escaping (inout LocalValue, LocalAction) -> Void,
-    value: WritableKeyPath<GlobalValue, LocalValue>,
-    action: WritableKeyPath<GlobalAction, LocalAction?>
-) -> (inout GlobalValue, GlobalAction) -> Void {
-    return { globalValue, globalAction in
-        guard let localAction = globalAction[keyPath: action] else { return }
-        localReducer(&globalValue[keyPath: value], localAction)
-    }
-}
-
-/// Reducerをまとめ上げる関数
-func combine<Value, Action>(
-    _ reducers: (inout Value, Action) -> Void...
-) -> (inout Value, Action) -> Void {
-    return { value, action in
-        for reducer in reducers {
-            reducer(&value, action)
-        }
-    }
-}
-
-/// Actionを元にValueを書き換えるためのストア
-final class Store<Value, Action>: ObservableObject {
-
-    let reducer: (inout Value, Action) -> Void
-    @Published private(set) var value: Value
-
-    init(value: Value, reducer: @escaping (inout Value, Action) -> Void) {
-        self.reducer = reducer
-        self.value = value
-    }
-
-    func send(_ action: Action) {
-        reducer(&value, action)
-    }
-}
 
 /// カウンターのView
 struct CounterView: View {
