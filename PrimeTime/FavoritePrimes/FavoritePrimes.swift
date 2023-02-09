@@ -5,7 +5,8 @@
 //  Created by Mizuo Nagayama on 2023/02/04.
 //
 
-import Foundation
+import ComposableArchitecture
+import SwiftUI
 
 /// お気に入り一覧で使うstate
 public struct FavoritePrimesState {
@@ -26,5 +27,29 @@ public func favoriteReducer(value: inout FavoritePrimesState, action: FavoriteAc
     switch action {
     case .removeFromFavorite(let number):
         value.favoritePrimes.removeAll(where: { $0 == number })
+    }
+}
+
+/// お気に入りの素数一覧のView
+public struct FavoritesView : View {
+
+    @ObservedObject var store: Store<FavoritePrimesState, FavoriteAction>
+
+    public init(store: Store<FavoritePrimesState, FavoriteAction>) {
+        self.store = store
+    }
+
+    public var body: some View {
+        List {
+            ForEach(store.value.favoritePrimes, id: \.self) { prime in
+                Text("\(prime)")
+                    .swipeActions {
+                        Button("Delete") {
+                            store.send(.removeFromFavorite(prime))
+                        }
+                        .tint(.red)
+                    }
+            }
+        }
     }
 }

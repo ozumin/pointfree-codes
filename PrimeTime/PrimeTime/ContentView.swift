@@ -11,16 +11,6 @@ import FavoritePrimes
 import PrimeModal
 import SwiftUI
 
-/// 素数計算用の関数
-func isPrime(_ p: Int) -> Bool {
-    if p <= 1 { return false }
-    if p <= 3 { return true }
-    for i in 2...Int(sqrtf(Float(p))) {
-        if p % i == 0 { return false }
-    }
-    return true
-}
-
 /// アプリの状態
 struct AppState {
     var targetNumber: Int = 0
@@ -135,97 +125,6 @@ let _appReducer: (inout AppState, AppAction) -> Void = combine(
 /// アプリで使うreducer
 let appReducer = pullBack(_appReducer, value: \.self, action: \.self)
 
-typealias CounterViewState = (targetNumber: Int, favoritePrimes: [Int])
-
-/// カウンターのView
-struct CounterView: View {
-
-    @ObservedObject var store: Store<CounterViewState, AppAction>
-    @State var showResultSheet: Bool = false
-
-    var body: some View {
-        VStack {
-            Spacer()
-            HStack{
-                Button {
-                    store.send(.counter(.decreaseNumber))
-                } label: {
-                    Text("-")
-                }
-                Text("\(store.value.targetNumber)")
-                Button {
-                    store.send(.counter(.increaseNumber))
-                } label: {
-                    Text("+")
-                }
-            }
-            Button {
-                showResultSheet = true
-            } label: {
-                Text("Is this prime?")
-            }
-            Button {
-                // TODO
-            } label: {
-                Text("What is the \(store.value.targetNumber)th prime?")
-            }
-            Spacer()
-        }
-        .sheet(isPresented: $showResultSheet) {
-            PrimeResultView(store: store.view({ .init(favoritePrimes: $0.favoritePrimes, targetNumber: $0.targetNumber) }))
-        }
-    }
-}
-
-/// CounterViewでsheet表示する素数の結果のView
-struct PrimeResultView: View {
-
-    @ObservedObject var store: Store<PrimeModalState, AppAction>
-
-    var body: some View {
-        VStack {
-            if isPrime(store.value.targetNumber) {
-                Text("\(store.value.targetNumber) is prime 🎉")
-                if store.value.favoritePrimes.contains(store.value.targetNumber) {
-                    Button {
-                        store.send(.primeResult(.removeFromFavorite))
-                    } label: {
-                        Text("Remove from favorite primes")
-                    }
-                } else {
-                    Button {
-                        store.send(.primeResult(.addToFavorite))
-                    } label: {
-                        Text("Save to favorite primes")
-                    }
-                }
-            } else {
-                Text("\(store.value.targetNumber) is not prime 😢")
-            }
-        }
-    }
-}
-
-/// お気に入りの素数一覧のView
-struct FavoritesView : View {
-
-    @ObservedObject var store: Store<FavoritePrimesState, AppAction>
-
-    var body: some View {
-        List {
-            ForEach(store.value.favoritePrimes, id: \.self) { prime in
-                Text("\(prime)")
-                    .swipeActions {
-                        Button("Delete") {
-                            store.send(.favorite(.removeFromFavorite(prime)))
-                        }
-                        .tint(.red)
-                    }
-            }
-        }
-    }
-}
-
 /// 大元のView
 struct ContentView: View {
 
@@ -235,12 +134,25 @@ struct ContentView: View {
         NavigationView {
             List {
                 NavigationLink {
-                    CounterView(store: store.view({ ($0.targetNumber, $0.favoritePrimes) }))
+                    CounterView(store: store.view(
+                        value: { ($0.targetNumber, $0.favoritePrimes) },
+                        action: {
+                            switch $0 {
+                            case let .primeResult(action):
+                                return .primeResult(action)
+                            case let .counter(action):
+                                return .counter(action)
+                            }
+                        }
+                    ))
                 } label: {
                     Text("Counter demo")
                 }
                 NavigationLink {
-                    FavoritesView(store: store.view({ .init(favoritePrimes: $0.favoritePrimes) }))
+                    FavoritesView(store: store.view(
+                        value: { .init(favoritePrimes: $0.favoritePrimes) },
+                        action: { .favorite($0) }
+                    ))
                 } label: {
                     Text("Favorite primes")
                 }
