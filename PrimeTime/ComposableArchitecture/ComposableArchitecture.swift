@@ -5,6 +5,7 @@
 //  Created by Mizuo Nagayama on 2023/02/04.
 //
 
+import Combine
 import Foundation
 
 /// Reducerの必要な部分だけ取り出す関数
@@ -36,6 +37,7 @@ public final class Store<Value, Action>: ObservableObject {
 
     let reducer: (inout Value, Action) -> Void
     @Published public private(set) var value: Value
+    private var cancellable: Cancellable?
 
     public init(value: Value, reducer: @escaping (inout Value, Action) -> Void) {
         self.reducer = reducer
@@ -44,5 +46,20 @@ public final class Store<Value, Action>: ObservableObject {
 
     public func send(_ action: Action) {
         reducer(&value, action)
+    }
+
+    public func view<LocalValue>(
+        _ f: @escaping (Value) -> LocalValue
+    ) -> Store<LocalValue, Action> {
+        let store: Store<LocalValue, Action> = .init(
+            value: f(self.value),
+            reducer: { value, action in
+                self.reducer(&self.value, action)
+            }
+        )
+        store.cancellable = self.$value.sink { [weak store] newValue in
+            store?.value = f(newValue)
+        }
+        return store
     }
 }

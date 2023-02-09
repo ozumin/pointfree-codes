@@ -135,10 +135,12 @@ let _appReducer: (inout AppState, AppAction) -> Void = combine(
 /// アプリで使うreducer
 let appReducer = pullBack(_appReducer, value: \.self, action: \.self)
 
+typealias CounterViewState = (targetNumber: Int, favoritePrimes: [Int])
+
 /// カウンターのView
 struct CounterView: View {
 
-    @ObservedObject var store: Store<AppState, AppAction>
+    @ObservedObject var store: Store<CounterViewState, AppAction>
     @State var showResultSheet: Bool = false
 
     var body: some View {
@@ -170,7 +172,7 @@ struct CounterView: View {
             Spacer()
         }
         .sheet(isPresented: $showResultSheet) {
-            PrimeResultView(store: store)
+            PrimeResultView(store: store.view({ .init(favoritePrimes: $0.favoritePrimes, targetNumber: $0.targetNumber) }))
         }
     }
 }
@@ -178,7 +180,7 @@ struct CounterView: View {
 /// CounterViewでsheet表示する素数の結果のView
 struct PrimeResultView: View {
 
-    @ObservedObject var store: Store<AppState, AppAction>
+    @ObservedObject var store: Store<PrimeModalState, AppAction>
 
     var body: some View {
         VStack {
@@ -207,7 +209,7 @@ struct PrimeResultView: View {
 /// お気に入りの素数一覧のView
 struct FavoritesView : View {
 
-    @ObservedObject var store: Store<AppState, AppAction>
+    @ObservedObject var store: Store<FavoritePrimesState, AppAction>
 
     var body: some View {
         List {
@@ -233,12 +235,12 @@ struct ContentView: View {
         NavigationView {
             List {
                 NavigationLink {
-                    CounterView(store: store)
+                    CounterView(store: store.view({ ($0.targetNumber, $0.favoritePrimes) }))
                 } label: {
                     Text("Counter demo")
                 }
                 NavigationLink {
-                    FavoritesView(store: store)
+                    FavoritesView(store: store.view({ .init(favoritePrimes: $0.favoritePrimes) }))
                 } label: {
                     Text("Favorite primes")
                 }
