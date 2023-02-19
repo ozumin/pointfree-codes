@@ -15,6 +15,11 @@ public enum CounterAction {
     case decreaseNumber
 }
 
+public let counterViewReducer: (inout CounterViewState, CounterViewAction) -> Void = combine(
+    pullBack(counterReducer, value: \.targetNumber, action: \.counter),
+    pullBack(primeResultReducer, value: \.self, action: \.primeResult)
+)
+
 /// CounterViewでのreducer
 public func counterReducer(value: inout Int, action: CounterAction) -> Void {
     switch action {
@@ -30,6 +35,30 @@ public typealias CounterViewState = (targetNumber: Int, favoritePrimes: [Int])
 public enum CounterViewAction {
     case counter(CounterAction)
     case primeResult(PrimeResultAction)
+
+    /// enumでKeyPathを取得するためのワークアラウンド
+    var counter: CounterAction? {
+        get {
+            guard case let .counter(value) = self else { return nil }
+            return value
+        }
+        set {
+            guard case .counter = self, let newValue = newValue else { return }
+            self = .counter(newValue)
+        }
+    }
+
+    /// enumでKeyPathを取得するためのワークアラウンド
+    var primeResult: PrimeResultAction? {
+        get {
+            guard case let .primeResult(value) = self else { return nil }
+            return value
+        }
+        set {
+            guard case .primeResult = self, let newValue = newValue else { return }
+            self = .primeResult(newValue)
+        }
+    }
 }
 
 /// カウンターのView
@@ -73,7 +102,7 @@ public struct CounterView: View {
         }
         .sheet(isPresented: $showResultSheet) {
             PrimeResultView(store: store.view(
-                value: { .init(favoritePrimes: $0.favoritePrimes, targetNumber: $0.targetNumber) },
+                value: { $0 },
                 action: { .primeResult($0) }
             ))
         }

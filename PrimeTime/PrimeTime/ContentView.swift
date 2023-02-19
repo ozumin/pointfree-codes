@@ -8,7 +8,6 @@
 import ComposableArchitecture
 import Counter
 import FavoritePrimes
-import PrimeModal
 import SwiftUI
 
 /// アプリの状態
@@ -47,11 +46,12 @@ extension AppState {
         }
     }
 
-    var primeModalState: PrimeModalState {
+    var counterViewState: CounterViewState {
         get {
-            .init(favoritePrimes: favoritePrimes, targetNumber: targetNumber)
+            CounterViewState(targetNumber: targetNumber, favoritePrimes: favoritePrimes)
         }
         set {
+            targetNumber = newValue.targetNumber
             favoritePrimes = newValue.favoritePrimes
         }
     }
@@ -59,31 +59,18 @@ extension AppState {
 
 /// アプリ全体のアクション
 enum AppAction {
-    case counter(CounterAction)
-    case primeResult(PrimeResultAction)
+    case counterView(CounterViewAction)
     case favorite(FavoriteAction)
 
     /// enumでKeyPathを取得するためのワークアラウンド
-    var counter: CounterAction? {
+    var counterView: CounterViewAction? {
         get {
-            guard case let .counter(value) = self else { return nil }
+            guard case let .counterView(value) = self else { return nil }
             return value
         }
         set {
-            guard case .counter = self, let newValue = newValue else { return }
-            self = .counter(newValue)
-        }
-    }
-
-    /// enumでKeyPathを取得するためのワークアラウンド
-    var primeResult: PrimeResultAction? {
-        get {
-            guard case let .primeResult(value) = self else { return nil }
-            return value
-        }
-        set {
-            guard case .primeResult = self, let newValue = newValue else { return }
-            self = .primeResult(newValue)
+            guard case .counterView = self, let newValue = newValue else { return }
+            self = .counterView(newValue)
         }
     }
 
@@ -103,11 +90,11 @@ enum AppAction {
 func activityFeed(_ reducer: @escaping (inout AppState, AppAction) -> Void) -> (inout AppState, AppAction) -> Void {
     { value, action in
         switch action {
-        case .counter(_):
+        case .counterView(.counter(_)):
             break
-        case .primeResult(.addToFavorite):
+        case .counterView(.primeResult(.addToFavorite)):
             value.activityFeed.append(.init(timestamp: .now, type: .addedFavoritePrime(value.targetNumber)))
-        case .primeResult(.removeFromFavorite):
+        case .counterView(.primeResult(.removeFromFavorite)):
             value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(value.targetNumber)))
         case let .favorite(.removeFromFavorite(number)):
             value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(number)))
@@ -117,8 +104,7 @@ func activityFeed(_ reducer: @escaping (inout AppState, AppAction) -> Void) -> (
 }
 
 let _appReducer: (inout AppState, AppAction) -> Void = combine(
-    pullBack(counterReducer, value: \.targetNumber, action: \.counter),
-    pullBack(primeResultReducer, value: \.primeModalState, action: \.primeResult),
+    pullBack(counterViewReducer, value: \.counterViewState, action: \.counterView),
     pullBack(favoriteReducer, value: \.favoritePrimesState, action: \.favorite)
 )
 
@@ -135,22 +121,15 @@ struct ContentView: View {
             List {
                 NavigationLink {
                     CounterView(store: store.view(
-                        value: { ($0.targetNumber, $0.favoritePrimes) },
-                        action: {
-                            switch $0 {
-                            case let .primeResult(action):
-                                return .primeResult(action)
-                            case let .counter(action):
-                                return .counter(action)
-                            }
-                        }
+                        value: { $0.counterViewState },
+                        action: { .counterView($0) }
                     ))
                 } label: {
                     Text("Counter demo")
                 }
                 NavigationLink {
                     FavoritesView(store: store.view(
-                        value: { .init(favoritePrimes: $0.favoritePrimes) },
+                        value: { $0.favoritePrimesState },
                         action: { .favorite($0) }
                     ))
                 } label: {

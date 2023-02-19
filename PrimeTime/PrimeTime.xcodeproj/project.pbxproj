@@ -187,6 +187,7 @@
 		83C6766F298DF1180071D602 /* PrimeModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimeModal.swift; sourceTree = "<group>"; };
 		83C67671298DF1410071D602 /* FavoritePrimes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritePrimes.swift; sourceTree = "<group>"; };
 		83C67673298DF1D20071D602 /* ComposableArchitecture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposableArchitecture.swift; sourceTree = "<group>"; };
+		83C6767B299A7B880071D602 /* PrimeTime.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = PrimeTime.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -268,6 +269,7 @@
 		83C675C3298C8E350071D602 = {
 			isa = PBXGroup;
 			children = (
+				83C6767B299A7B880071D602 /* PrimeTime.playground */,
 				83C675CE298C8E350071D602 /* PrimeTime */,
 				83C675E3298C90DD0071D602 /* Counter */,
 				83C675F1298C90DD0071D602 /* CounterTests */,

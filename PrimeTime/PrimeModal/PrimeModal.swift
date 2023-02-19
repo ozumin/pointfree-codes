@@ -8,15 +8,7 @@
 import ComposableArchitecture
 import SwiftUI
 
-public struct PrimeModalState {
-    public var favoritePrimes: [Int]
-    public let targetNumber: Int
-
-    public init(favoritePrimes: [Int], targetNumber: Int) {
-        self.favoritePrimes = favoritePrimes
-        self.targetNumber = targetNumber
-    }
-}
+public typealias PrimeModalState = (targetNumber: Int, favoritePrimes: [Int])
 
 /// 素数結果表示時のアクション
 public enum PrimeResultAction {
