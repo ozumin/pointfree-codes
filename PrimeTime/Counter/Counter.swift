@@ -15,18 +15,20 @@ public enum CounterAction {
     case decreaseNumber
 }
 
-public let counterViewReducer: (inout CounterViewState, CounterViewAction) -> Void = combine(
+public let counterViewReducer: Reducer<CounterViewState, CounterViewAction> = combine(
     pullBack(counterReducer, value: \.targetNumber, action: \.counter),
     pullBack(primeResultReducer, value: \.self, action: \.primeResult)
 )
 
 /// CounterViewでのreducer
-public func counterReducer(value: inout Int, action: CounterAction) -> Void {
+public func counterReducer(value: inout Int, action: CounterAction) -> Effect {
     switch action {
     case .decreaseNumber:
         value -= 1
+        return {}
     case .increaseNumber:
         value += 1
+        return {}
     }
 }
 

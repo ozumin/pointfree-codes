@@ -17,12 +17,14 @@ public enum PrimeResultAction {
 }
 
 /// PrimeResultViewでのreducer
-public func primeResultReducer(value: inout PrimeModalState, action: PrimeResultAction) -> Void {
+public func primeResultReducer(value: inout PrimeModalState, action: PrimeResultAction) -> Effect {
     switch action {
     case .addToFavorite:
         value.favoritePrimes.append(value.targetNumber)
+        return {}
     case .removeFromFavorite:
         value.favoritePrimes.removeAll(where: { $0 == value.targetNumber })
+        return {}
     }
 }
 

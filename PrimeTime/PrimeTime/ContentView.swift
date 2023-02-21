@@ -37,12 +37,12 @@ struct AppState {
 extension AppState {
 
     /// これによってpullBack()で使うkeyPathが取得できる
-    var favoritePrimesState: FavoritePrimesState {
+    var favoritePrimesState: [Int] {
         get {
-            .init(favoritePrimes: favoritePrimes)
+            favoritePrimes
         }
         set {
-            favoritePrimes = newValue.favoritePrimes
+            favoritePrimes = newValue
         }
     }
 
@@ -87,10 +87,10 @@ enum AppAction {
     }
 }
 
-func activityFeed(_ reducer: @escaping (inout AppState, AppAction) -> Void) -> (inout AppState, AppAction) -> Void {
+func activityFeed(_ reducer: @escaping Reducer<AppState, AppAction>) -> Reducer<AppState, AppAction> {
     { value, action in
         switch action {
-        case .counterView(.counter(_)):
+        case .counterView(.counter(_)), .favorite(.loadedFavoritePrimes(_)), .favorite(.saveButtonTapped):
             break
         case .counterView(.primeResult(.addToFavorite)):
             value.activityFeed.append(.init(timestamp: .now, type: .addedFavoritePrime(value.targetNumber)))
@@ -99,11 +99,14 @@ func activityFeed(_ reducer: @escaping (inout AppState, AppAction) -> Void) -> (
         case let .favorite(.removeFromFavorite(number)):
             value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(number)))
         }
-        reducer(&value, action)
+        let effect = reducer(&value, action)
+        return {
+            effect()
+        }
     }
 }
 
-let _appReducer: (inout AppState, AppAction) -> Void = combine(
+let _appReducer: Reducer<AppState, AppAction> = combine(
     pullBack(counterViewReducer, value: \.counterViewState, action: \.counterView),
     pullBack(favoriteReducer, value: \.favoritePrimesState, action: \.favorite)
 )

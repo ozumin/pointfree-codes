@@ -8,26 +8,34 @@
 import Combine
 import Foundation
 
+public typealias Effect = () -> Void
+
+public typealias Reducer<Value, Action> = (inout Value, Action) -> Effect
+
 /// Reducerの必要な部分だけ取り出す関数
 /// GlobalValueの一部をLocalValueとして、GlobalActionの一部をLocalActionとしてreducerに渡している
 public func pullBack<LocalValue, GlobalValue, GlobalAction, LocalAction>(
-    _ localReducer: @escaping (inout LocalValue, LocalAction) -> Void,
+    _ localReducer: @escaping Reducer<LocalValue, LocalAction>,
     value: WritableKeyPath<GlobalValue, LocalValue>,
     action: WritableKeyPath<GlobalAction, LocalAction?>
-) -> (inout GlobalValue, GlobalAction) -> Void {
+) -> Reducer<GlobalValue, GlobalAction> {
     return { globalValue, globalAction in
-        guard let localAction = globalAction[keyPath: action] else { return }
-        localReducer(&globalValue[keyPath: value], localAction)
+        guard let localAction = globalAction[keyPath: action] else { return {} }
+        let effect = localReducer(&globalValue[keyPath: value], localAction)
+        return effect
     }
 }
 
 /// Reducerをまとめ上げる関数
 public func combine<Value, Action>(
-    _ reducers: (inout Value, Action) -> Void...
-) -> (inout Value, Action) -> Void {
+    _ reducers: Reducer<Value, Action>...
+) -> Reducer<Value, Action> {
     return { value, action in
-        for reducer in reducers {
-            reducer(&value, action)
+        let effects = reducers.map { $0(&value, action) }
+        return {
+            for effect in effects {
+                effect()
+            }
         }
     }
 }
@@ -35,17 +43,18 @@ public func combine<Value, Action>(
 /// Actionを元にValueを書き換えるためのストア
 public final class Store<Value, Action>: ObservableObject {
 
-    let reducer: (inout Value, Action) -> Void
+    let reducer: Reducer<Value, Action>
     @Published public private(set) var value: Value
     private var cancellable: Cancellable?
 
-    public init(value: Value, reducer: @escaping (inout Value, Action) -> Void) {
+    public init(value: Value, reducer: @escaping Reducer<Value, Action>) {
         self.reducer = reducer
         self.value = value
     }
 
     public func send(_ action: Action) {
-        reducer(&value, action)
+        let effect = reducer(&value, action)
+        effect()
     }
 
     public func view<LocalValue, LocalAction>(
@@ -54,8 +63,10 @@ public final class Store<Value, Action>: ObservableObject {
     ) -> Store<LocalValue, LocalAction> {
         let store: Store<LocalValue, LocalAction> = .init(
             value: toLocalValue(self.value),
-            reducer: { value, action in
-                self.reducer(&self.value, toGlobalAction(action))
+            reducer: { localValue, localAction in
+                self.send(toGlobalAction(localAction))
+                localValue = toLocalValue(self.value)
+                return {}
             }
         )
         store.cancellable = self.$value.sink { [weak store] newValue in
