@@ -21,14 +21,14 @@ public let counterViewReducer: Reducer<CounterViewState, CounterViewAction> = co
 )
 
 /// CounterViewでのreducer
-public func counterReducer(value: inout Int, action: CounterAction) -> Effect {
+public func counterReducer(value: inout Int, action: CounterAction) -> [Effect<CounterAction>] {
     switch action {
     case .decreaseNumber:
         value -= 1
-        return {}
+        return []
     case .increaseNumber:
         value += 1
-        return {}
+        return []
     }
 }
 

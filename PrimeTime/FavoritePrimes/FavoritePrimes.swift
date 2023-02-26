@@ -13,30 +13,52 @@ public enum FavoriteAction {
     case removeFromFavorite(Int)
     case loadedFavoritePrimes([Int])
     case saveButtonTapped
+    case loadButtonTapped
 }
 
 /// FavoriteViewで使うreducer
-public func favoriteReducer(value: inout [Int], action: FavoriteAction) -> Effect {
+public func favoriteReducer(value: inout [Int], action: FavoriteAction) -> [Effect<FavoriteAction>] {
     switch action {
     case .removeFromFavorite(let number):
         value.removeAll(where: { $0 == number })
-        return {}
+        return []
     case .loadedFavoritePrimes(let favoritePrimes):
         value = favoritePrimes
-        return {}
+        return []
     case .saveButtonTapped:
         let newValue = value
-        return {
-            let data = try! JSONEncoder().encode(newValue)
-            let documentsPath = NSSearchPathForDirectoriesInDomains(
-                .documentDirectory, .userDomainMask, true
-            )[0]
-            let documentsUrl = URL(fileURLWithPath: documentsPath)
-            let favoritePrimesUrl = documentsUrl
-                .appendingPathComponent("favorite-primes.json")
-            try! data.write(to: favoritePrimesUrl)
-        }
+        return [saveEffect(favoritePrimes: newValue)]
+    case .loadButtonTapped:
+        return [loadEffect]
     }
+}
+
+private func saveEffect(favoritePrimes: [Int]) -> Effect<FavoriteAction> {
+    return {
+        let data = try! JSONEncoder().encode(favoritePrimes)
+        let documentsPath = NSSearchPathForDirectoriesInDomains(
+            .documentDirectory, .userDomainMask, true
+        )[0]
+        let documentsUrl = URL(fileURLWithPath: documentsPath)
+        let favoritePrimesUrl = documentsUrl
+            .appendingPathComponent("favorite-primes.json")
+        try! data.write(to: favoritePrimesUrl)
+        return nil
+    }
+}
+
+private let loadEffect: Effect<FavoriteAction> = {
+    let documentsPath = NSSearchPathForDirectoriesInDomains(
+        .documentDirectory, .userDomainMask, true
+    )[0]
+    let documentsUrl = URL(fileURLWithPath: documentsPath)
+    let favoritePrimesUrl = documentsUrl
+        .appendingPathComponent("favorite-primes.json")
+    guard
+        let data = try? Data(contentsOf: favoritePrimesUrl),
+        let favoritePrimes = try? JSONDecoder().decode([Int].self, from: data)
+    else { return nil }
+    return .loadedFavoritePrimes(favoritePrimes)
 }
 
 /// お気に入りの素数一覧のView
@@ -68,17 +90,7 @@ public struct FavoritesView : View {
                 Text("Save")
             }
             Button {
-                let documentsPath = NSSearchPathForDirectoriesInDomains(
-                    .documentDirectory, .userDomainMask, true
-                )[0]
-                let documentsUrl = URL(fileURLWithPath: documentsPath)
-                let favoritePrimesUrl = documentsUrl
-                    .appendingPathComponent("favorite-primes.json")
-                guard
-                    let data = try? Data(contentsOf: favoritePrimesUrl),
-                    let favoritePrimes = try? JSONDecoder().decode([Int].self, from: data)
-                else { return }
-                self.store.send(.loadedFavoritePrimes(favoritePrimes))
+                self.store.send(.loadButtonTapped)
             } label: {
                 Text("Load")
             }

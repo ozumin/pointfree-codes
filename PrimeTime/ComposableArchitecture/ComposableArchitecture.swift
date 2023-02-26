@@ -8,9 +8,9 @@
 import Combine
 import Foundation
 
-public typealias Effect = () -> Void
+public typealias Effect<Action> = () -> Action?
 
-public typealias Reducer<Value, Action> = (inout Value, Action) -> Effect
+public typealias Reducer<Value, Action> = (inout Value, Action) -> [Effect<Action>]
 
 /// Reducerの必要な部分だけ取り出す関数
 /// GlobalValueの一部をLocalValueとして、GlobalActionの一部をLocalActionとしてreducerに渡している
@@ -20,9 +20,16 @@ public func pullBack<LocalValue, GlobalValue, GlobalAction, LocalAction>(
     action: WritableKeyPath<GlobalAction, LocalAction?>
 ) -> Reducer<GlobalValue, GlobalAction> {
     return { globalValue, globalAction in
-        guard let localAction = globalAction[keyPath: action] else { return {} }
-        let effect = localReducer(&globalValue[keyPath: value], localAction)
-        return effect
+        guard let localAction = globalAction[keyPath: action] else { return [] }
+        let localEffects = localReducer(&globalValue[keyPath: value], localAction)
+        return localEffects.map { localEffect in
+            return { () -> GlobalAction? in
+                guard let localAction = localEffect() else { return nil }
+                var globalAction = globalAction
+                globalAction[keyPath: action] = localAction
+                return globalAction
+            }
+        }
     }
 }
 
@@ -31,12 +38,7 @@ public func combine<Value, Action>(
     _ reducers: Reducer<Value, Action>...
 ) -> Reducer<Value, Action> {
     return { value, action in
-        let effects = reducers.map { $0(&value, action) }
-        return {
-            for effect in effects {
-                effect()
-            }
-        }
+        return reducers.flatMap { $0(&value, action) }
     }
 }
 
@@ -53,8 +55,12 @@ public final class Store<Value, Action>: ObservableObject {
     }
 
     public func send(_ action: Action) {
-        let effect = reducer(&value, action)
-        effect()
+        let effects = reducer(&value, action)
+        for effect in effects {
+            if let action = effect() {
+                send(action)
+            }
+        }
     }
 
     public func view<LocalValue, LocalAction>(
@@ -66,7 +72,7 @@ public final class Store<Value, Action>: ObservableObject {
             reducer: { localValue, localAction in
                 self.send(toGlobalAction(localAction))
                 localValue = toLocalValue(self.value)
-                return {}
+                return []
             }
         )
         store.cancellable = self.$value.sink { [weak store] newValue in
@@ -74,4 +80,20 @@ public final class Store<Value, Action>: ObservableObject {
         }
         return store
     }
+}
+
+public func logging<Value, Action>(
+  _ reducer: @escaping Reducer<Value, Action>
+) -> Reducer<Value, Action> {
+  return { value, action in
+    let effects = reducer(&value, action)
+    let newValue = value
+    return [{
+      print("Action: \(action)")
+      print("Value:")
+      dump(newValue)
+      print("---")
+      return nil
+    }] + effects
+  }
 }

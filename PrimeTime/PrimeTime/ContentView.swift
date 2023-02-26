@@ -90,7 +90,11 @@ enum AppAction {
 func activityFeed(_ reducer: @escaping Reducer<AppState, AppAction>) -> Reducer<AppState, AppAction> {
     { value, action in
         switch action {
-        case .counterView(.counter(_)), .favorite(.loadedFavoritePrimes(_)), .favorite(.saveButtonTapped):
+        case
+                .counterView(.counter(_)),
+                .favorite(.loadedFavoritePrimes(_)),
+                .favorite(.saveButtonTapped),
+                .favorite(.loadButtonTapped):
             break
         case .counterView(.primeResult(.addToFavorite)):
             value.activityFeed.append(.init(timestamp: .now, type: .addedFavoritePrime(value.targetNumber)))
@@ -99,20 +103,15 @@ func activityFeed(_ reducer: @escaping Reducer<AppState, AppAction>) -> Reducer<
         case let .favorite(.removeFromFavorite(number)):
             value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(number)))
         }
-        let effect = reducer(&value, action)
-        return {
-            effect()
-        }
+        return reducer(&value, action)
     }
 }
 
-let _appReducer: Reducer<AppState, AppAction> = combine(
+/// アプリで使うreducer
+let appReducer: Reducer<AppState, AppAction> = combine(
     pullBack(counterViewReducer, value: \.counterViewState, action: \.counterView),
     pullBack(favoriteReducer, value: \.favoritePrimesState, action: \.favorite)
 )
-
-/// アプリで使うreducer
-let appReducer = pullBack(_appReducer, value: \.self, action: \.self)
 
 /// 大元のView
 struct ContentView: View {
@@ -149,7 +148,7 @@ struct ContentView_Previews: PreviewProvider {
         ContentView(
             store: Store<AppState, AppAction>(
                 value: AppState(),
-                reducer: activityFeed(appReducer)
+                reducer: logging(activityFeed(appReducer))
             )
         )
     }

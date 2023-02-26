@@ -8,8 +8,8 @@ import ComposableArchitecture
 import FavoritePrimes
 PlaygroundPage.current.setLiveView(
     FavoritesView(
-        store: Store<FavoritePrimesState, FavoriteAction>(
-            value: .init(favoritePrimes: [2,5,7]),
+        store: Store<[Int], FavoriteAction>(
+            value: [2,5,7],
             reducer: favoriteReducer
         )
     )

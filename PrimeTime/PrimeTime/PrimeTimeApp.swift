@@ -15,7 +15,7 @@ struct PrimeTimeApp: App {
             ContentView(
                 store: Store<AppState, AppAction>(
                     value: AppState(),
-                    reducer: activityFeed(appReducer)
+                    reducer: logging(activityFeed(appReducer))
                 )
             )
         }
