@@ -45,15 +45,10 @@ public func counterReducer(value: inout CounterState, action: CounterAction) -> 
         return []
     case .nthPrimeButtonTapped:
         value.isNthPrimeButtonDisabled = true
-        let count = value.targetNumber
         return [
-            { callback in
-                nthPrime(count) { prime in
-                    DispatchQueue.main.async {
-                        callback(.nthPrimeResponse(prime))
-                    }
-                }
-            }
+            nthPrime(value.targetNumber)
+                .map(CounterAction.nthPrimeResponse)
+                .receive(on: .main)
         ]
     case let .nthPrimeResponse(prime):
         value.alertNthPrime = prime.map(PrimeAlert.init(prime:))
@@ -66,10 +61,10 @@ public func counterReducer(value: inout CounterState, action: CounterAction) -> 
 }
 
 public struct CounterViewState {
-    var alertNthPrime: PrimeAlert?
+    public var alertNthPrime: PrimeAlert?
     public var targetNumber: Int
     public var favoritePrimes: [Int]
-    var isNthPrimeButtonDisabled: Bool
+    public var isNthPrimeButtonDisabled: Bool
 
     public init(
         alertNthPrime: PrimeAlert?,
