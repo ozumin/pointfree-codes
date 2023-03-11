@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-public typealias Effect<Action> = () -> Action?
+public typealias Effect<Action> = (@escaping (Action) -> Void) -> Void
 
 public typealias Reducer<Value, Action> = (inout Value, Action) -> [Effect<Action>]
 
@@ -23,11 +23,12 @@ public func pullBack<LocalValue, GlobalValue, GlobalAction, LocalAction>(
         guard let localAction = globalAction[keyPath: action] else { return [] }
         let localEffects = localReducer(&globalValue[keyPath: value], localAction)
         return localEffects.map { localEffect in
-            return { () -> GlobalAction? in
-                guard let localAction = localEffect() else { return nil }
-                var globalAction = globalAction
-                globalAction[keyPath: action] = localAction
-                return globalAction
+            { callback in
+                localEffect { localAction in
+                    var globalAction = globalAction
+                    globalAction[keyPath: action] = localAction
+                    callback(globalAction)
+                }
             }
         }
     }
@@ -56,10 +57,8 @@ public final class Store<Value, Action>: ObservableObject {
 
     public func send(_ action: Action) {
         let effects = reducer(&value, action)
-        for effect in effects {
-            if let action = effect() {
-                send(action)
-            }
+        effects.forEach { effect in
+            effect(self.send)
         }
     }
 
@@ -88,12 +87,11 @@ public func logging<Value, Action>(
   return { value, action in
     let effects = reducer(&value, action)
     let newValue = value
-    return [{
+    return [{ _ in
       print("Action: \(action)")
       print("Value:")
       dump(newValue)
       print("---")
-      return nil
     }] + effects
   }
 }

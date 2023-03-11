@@ -5,15 +5,15 @@ import PlaygroundSupport
 import ComposableArchitecture
 
 
-import FavoritePrimes
-PlaygroundPage.current.setLiveView(
-    FavoritesView(
-        store: Store<[Int], FavoriteAction>(
-            value: [2,5,7],
-            reducer: favoriteReducer
-        )
-    )
-)
+//import FavoritePrimes
+//PlaygroundPage.current.setLiveView(
+//    FavoritesView(
+//        store: Store<[Int], FavoriteAction>(
+//            value: [2,5,7],
+//            reducer: favoriteReducer
+//        )
+//    )
+//)
 
 //import PrimeModal
 //PlaygroundPage.current.setLiveView(
@@ -25,12 +25,17 @@ PlaygroundPage.current.setLiveView(
 //    )
 //)
 
-//import Counter
-//PlaygroundPage.current.setLiveView(
-//    CounterView(
-//        store: Store<CounterViewState, CounterViewAction>(
-//            value: CounterViewState(targetNumber: 3, favoritePrimes: [1,2,3]),
-//            reducer: counterViewReducer
-//        )
-//    )
-//)
+import Counter
+PlaygroundPage.current.setLiveView(
+    CounterView(
+        store: Store<CounterViewState, CounterViewAction>(
+            value: CounterViewState(
+                alertNthPrime: nil,
+                targetNumber: 3,
+                favoritePrimes: [1,2,3],
+                isNthPrimeButtonDisabled: false
+            ),
+            reducer: counterViewReducer
+        )
+    )
+)

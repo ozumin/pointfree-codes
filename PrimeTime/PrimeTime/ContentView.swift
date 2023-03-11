@@ -48,7 +48,7 @@ extension AppState {
 
     var counterViewState: CounterViewState {
         get {
-            CounterViewState(targetNumber: targetNumber, favoritePrimes: favoritePrimes)
+            CounterViewState(alertNthPrime: nil, targetNumber: targetNumber, favoritePrimes: favoritePrimes, isNthPrimeButtonDisabled: false)
         }
         set {
             targetNumber = newValue.targetNumber
