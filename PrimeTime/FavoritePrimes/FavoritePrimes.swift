@@ -29,12 +29,16 @@ public func favoriteReducer(value: inout [Int], action: FavoriteAction) -> [Effe
         let newValue = value
         return [saveEffect(favoritePrimes: newValue)]
     case .loadButtonTapped:
-        return [loadEffect]
+        return [
+            loadEffect
+                .compactMap { $0 }
+                .eraseToEffect()
+        ]
     }
 }
 
 private func saveEffect(favoritePrimes: [Int]) -> Effect<FavoriteAction> {
-    return Effect { _ in
+    return .fireAndForget {
         let data = try! JSONEncoder().encode(favoritePrimes)
         let documentsPath = NSSearchPathForDirectoriesInDomains(
             .documentDirectory, .userDomainMask, true
@@ -46,7 +50,7 @@ private func saveEffect(favoritePrimes: [Int]) -> Effect<FavoriteAction> {
     }
 }
 
-private let loadEffect: Effect<FavoriteAction> = Effect { callback in
+private let loadEffect = Effect<FavoriteAction?>.sync {
     let documentsPath = NSSearchPathForDirectoriesInDomains(
         .documentDirectory, .userDomainMask, true
     )[0]
@@ -56,8 +60,8 @@ private let loadEffect: Effect<FavoriteAction> = Effect { callback in
     guard
         let data = try? Data(contentsOf: favoritePrimesUrl),
         let favoritePrimes = try? JSONDecoder().decode([Int].self, from: data)
-    else { return }
-    callback(.loadedFavoritePrimes(favoritePrimes))
+    else { return nil }
+    return .loadedFavoritePrimes(favoritePrimes)
 }
 
 /// お気に入りの素数一覧のView

@@ -28,18 +28,20 @@ struct WolframAlphaResult: Decodable {
 }
 
 func nthPrime(_ n: Int) -> Effect<Int?> {
-    return wolframAlpha(query: "prime \(n)").map { result in
-        result
-            .flatMap {
-                $0.queryresult
-                    .pods
-                    .first(where: { $0.primary == .some(true) })?
-                    .subpods
-                    .first?
-                    .plaintext
-            }
-            .flatMap(Int.init)
-    }
+    return wolframAlpha(query: "prime \(n)")
+        .map { result in
+            result
+                .flatMap {
+                    $0.queryresult
+                        .pods
+                        .first(where: { $0.primary == .some(true) })?
+                        .subpods
+                        .first?
+                        .plaintext
+                }
+                .flatMap(Int.init)
+        }
+        .eraseToEffect()
 }
 
 func wolframAlpha(query: String) -> Effect<WolframAlphaResult?> {
@@ -50,6 +52,12 @@ func wolframAlpha(query: String) -> Effect<WolframAlphaResult?> {
         URLQueryItem(name: "output", value: "JSON"),
         URLQueryItem(name: "appid", value: wolframAlphaApiKey),
     ]
-    return dataTask(with: components.url(relativeTo: nil)!)
-        .decode(as: WolframAlphaResult.self)
+
+    return URLSession.shared
+        .dataTaskPublisher(for: components.url(relativeTo: nil)!)
+        .map { data, _ in data }
+        .decode(type: WolframAlphaResult.self, decoder: JSONDecoder())
+        .map(Optional.some)
+        .replaceError(with: nil)
+        .eraseToEffect()
 }
