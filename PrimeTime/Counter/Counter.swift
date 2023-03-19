@@ -24,7 +24,7 @@ public typealias CounterState = (
     isNthPrimeButtonDisabled: Bool
 )
 
-public struct PrimeAlert: Identifiable {
+public struct PrimeAlert: Equatable, Identifiable {
     let prime: Int
     public var id: Int { self.prime }
 }
@@ -61,7 +61,7 @@ public func counterReducer(value: inout CounterState, action: CounterAction) -> 
     }
 }
 
-public struct CounterViewState {
+public struct CounterViewState: Equatable {
     public var alertNthPrime: PrimeAlert?
     public var targetNumber: Int
     public var favoritePrimes: [Int]

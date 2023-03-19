@@ -625,7 +625,6 @@
 					};
 					83C675EA298C90DD0071D602 = {
 						CreatedOnToolsVersion = 14.0.1;
-						TestTargetID = 83C675CB298C8E350071D602;
 					};
 					83C67604298C90F20071D602 = {
 						CreatedOnToolsVersion = 14.0.1;
@@ -633,7 +632,6 @@
 					};
 					83C6760D298C90F20071D602 = {
 						CreatedOnToolsVersion = 14.0.1;
-						TestTargetID = 83C675CB298C8E350071D602;
 					};
 					83C67626298C90FC0071D602 = {
 						CreatedOnToolsVersion = 14.0.1;
@@ -641,7 +639,6 @@
 					};
 					83C6762F298C90FC0071D602 = {
 						CreatedOnToolsVersion = 14.0.1;
-						TestTargetID = 83C675CB298C8E350071D602;
 					};
 					83C6764B298C92230071D602 = {
 						CreatedOnToolsVersion = 14.0.1;
@@ -1141,7 +1138,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
 			};
 			name = Debug;
 		};
@@ -1159,7 +1155,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
 			};
 			name = Release;
 		};
@@ -1240,7 +1235,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
 			};
 			name = Debug;
 		};
@@ -1258,7 +1252,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
 			};
 			name = Release;
 		};
@@ -1339,7 +1332,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
 			};
 			name = Debug;
 		};
@@ -1357,7 +1349,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
 			};
 			name = Release;
 		};
