@@ -11,7 +11,7 @@ import SwiftUI
 public typealias PrimeModalState = (targetNumber: Int, favoritePrimes: [Int])
 
 /// 素数結果表示時のアクション
-public enum PrimeResultAction {
+public enum PrimeResultAction: Equatable {
     case addToFavorite
     case removeFromFavorite
 }

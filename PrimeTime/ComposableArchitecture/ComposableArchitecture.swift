@@ -41,6 +41,15 @@ extension Publisher where Failure == Never {
     }
 }
 
+public func absurd<A>(_ never: Never) -> A {}
+
+extension Publisher where Output == Never, Failure == Never {
+
+    public func fireAndForget<A>() -> Effect<A> {
+        self.map(absurd).eraseToEffect()
+    }
+}
+
 public typealias Reducer<Value, Action> = (inout Value, Action) -> [Effect<Action>]
 
 /// Reducerの必要な部分だけ取り出す関数

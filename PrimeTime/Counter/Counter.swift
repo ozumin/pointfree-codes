@@ -10,7 +10,7 @@ import PrimeModal
 import SwiftUI
 
 /// カウンターでのアクション
-public enum CounterAction {
+public enum CounterAction: Equatable {
     case increaseNumber
     case decreaseNumber
     case nthPrimeButtonTapped
@@ -46,7 +46,7 @@ public func counterReducer(value: inout CounterState, action: CounterAction) -> 
     case .nthPrimeButtonTapped:
         value.isNthPrimeButtonDisabled = true
         return [
-            nthPrime(value.targetNumber)
+            Current.nthPrime(value.targetNumber)
                 .map(CounterAction.nthPrimeResponse)
                 .receive(on: DispatchQueue.main)
                 .eraseToEffect()
@@ -90,7 +90,7 @@ public struct CounterViewState: Equatable {
     }
 }
 
-public enum CounterViewAction {
+public enum CounterViewAction: Equatable {
     case counter(CounterAction)
     case primeResult(PrimeResultAction)
 
@@ -117,6 +117,18 @@ public enum CounterViewAction {
             self = .primeResult(newValue)
         }
     }
+}
+
+var Current: CounterEnvironment = .live
+
+struct CounterEnvironment {
+
+    var nthPrime: (Int) -> Effect<Int?>
+}
+
+extension CounterEnvironment {
+
+    static let live = Self(nthPrime: Counter.nthPrime)
 }
 
 /// カウンターのView
@@ -179,3 +191,10 @@ public struct CounterView: View {
         }
     }
 }
+
+#if DEBUG
+extension CounterEnvironment {
+
+    static let mock = Self(nthPrime: { _ in .sync { 17 } })
+}
+#endif

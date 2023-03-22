@@ -27,21 +27,24 @@ struct WolframAlphaResult: Decodable {
   }
 }
 
+import Combine
 func nthPrime(_ n: Int) -> Effect<Int?> {
-    return wolframAlpha(query: "prime \(n)")
-        .map { result in
-            result
-                .flatMap {
-                    $0.queryresult
-                        .pods
-                        .first(where: { $0.primary == .some(true) })?
-                        .subpods
-                        .first?
-                        .plaintext
-                }
-                .flatMap(Int.init)
-        }
-        .eraseToEffect()
+    Thread.sleep(forTimeInterval: 1)
+    return Just(1111).eraseToEffect()
+//    return wolframAlpha(query: "prime \(n)")
+//        .map { result in
+//            result
+//                .flatMap {
+//                    $0.queryresult
+//                        .pods
+//                        .first(where: { $0.primary == .some(true) })?
+//                        .subpods
+//                        .first?
+//                        .plaintext
+//                }
+//                .flatMap(Int.init)
+//        }
+//        .eraseToEffect()
 }
 
 func wolframAlpha(query: String) -> Effect<WolframAlphaResult?> {

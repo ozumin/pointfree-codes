@@ -5,11 +5,12 @@
 //  Created by Mizuo Nagayama on 2023/02/04.
 //
 
+import Combine
 import ComposableArchitecture
 import SwiftUI
 
 /// お気に入り一覧でのアクション
-public enum FavoriteAction {
+public enum FavoriteAction: Equatable {
     case removeFromFavorite(Int)
     case loadedFavoritePrimes([Int])
     case saveButtonTapped
@@ -26,42 +27,65 @@ public func favoriteReducer(value: inout [Int], action: FavoriteAction) -> [Effe
         value = favoritePrimes
         return []
     case .saveButtonTapped:
-        let newValue = value
-        return [saveEffect(favoritePrimes: newValue)]
+        return [
+            Current.fileClient
+                .save("favorite-primes.json", try! JSONEncoder().encode(value))
+                .fireAndForget()
+        ]
     case .loadButtonTapped:
         return [
-            loadEffect
+            Current.fileClient
+                .load("favorite-primes.json")
                 .compactMap { $0 }
+                .decode(type: [Int].self, decoder: JSONDecoder())
+                .catch { _ in Empty(completeImmediately: true) }
+                .map(FavoriteAction.loadedFavoritePrimes)
                 .eraseToEffect()
         ]
     }
 }
 
-private func saveEffect(favoritePrimes: [Int]) -> Effect<FavoriteAction> {
-    return .fireAndForget {
-        let data = try! JSONEncoder().encode(favoritePrimes)
-        let documentsPath = NSSearchPathForDirectoriesInDomains(
-            .documentDirectory, .userDomainMask, true
-        )[0]
-        let documentsUrl = URL(fileURLWithPath: documentsPath)
-        let favoritePrimesUrl = documentsUrl
-            .appendingPathComponent("favorite-primes.json")
-        try! data.write(to: favoritePrimesUrl)
-    }
+var Current = FavoritePrimesEnvironment.live
+
+struct FavoritePrimesEnvironment {
+    var fileClient: FileClient
 }
 
-private let loadEffect = Effect<FavoriteAction?>.sync {
-    let documentsPath = NSSearchPathForDirectoriesInDomains(
-        .documentDirectory, .userDomainMask, true
-    )[0]
-    let documentsUrl = URL(fileURLWithPath: documentsPath)
-    let favoritePrimesUrl = documentsUrl
-        .appendingPathComponent("favorite-primes.json")
-    guard
-        let data = try? Data(contentsOf: favoritePrimesUrl),
-        let favoritePrimes = try? JSONDecoder().decode([Int].self, from: data)
-    else { return nil }
-    return .loadedFavoritePrimes(favoritePrimes)
+extension FavoritePrimesEnvironment {
+    static let live = FavoritePrimesEnvironment(fileClient: .live)
+}
+
+struct FileClient {
+    var load: (String) -> Effect<Data?>
+    var save: (String, Data) -> Effect<Never>
+}
+
+extension FileClient {
+
+    static let live = FileClient(
+        load: { fileName in
+                .sync {
+                    let documentsPath = NSSearchPathForDirectoriesInDomains(
+                        .documentDirectory, .userDomainMask, true
+                    )[0]
+                    let documentsUrl = URL(fileURLWithPath: documentsPath)
+                    let favoritePrimesUrl = documentsUrl
+                        .appendingPathComponent(fileName)
+                    return try? Data(contentsOf: favoritePrimesUrl)
+                }
+        },
+        save: { fileName, data in
+                .fireAndForget {
+                    let documentsPath = NSSearchPathForDirectoriesInDomains(
+                        .documentDirectory, .userDomainMask, true
+                    )[0]
+                    let documentsUrl = URL(fileURLWithPath: documentsPath)
+                    let favoritePrimesUrl = documentsUrl
+                        .appendingPathComponent(fileName)
+                    try! data.write(to: favoritePrimesUrl)
+                }
+        }
+    )
 }
 
 /// お気に入りの素数一覧のView
@@ -100,3 +124,14 @@ public struct FavoritesView : View {
         })
     }
 }
+
+#if DEBUG
+extension FavoritePrimesEnvironment {
+    static let mock = FavoritePrimesEnvironment(
+        fileClient: .init(
+            load: { _ in Effect<Data?>.sync { try! JSONEncoder().encode([2, 31]) } },
+            save: { _, _ in .fireAndForget {} }
+        )
+    )
+}
+#endif

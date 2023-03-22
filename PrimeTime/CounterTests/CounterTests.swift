@@ -10,6 +10,11 @@ import XCTest
 
 final class CounterTests: XCTestCase {
 
+    override func setUp() {
+        super.setUp()
+        Current = .mock
+    }
+
     func testIncreaseNumber() throws {
         var store = CounterViewState(
             alertNthPrime: nil,
@@ -55,6 +60,8 @@ final class CounterTests: XCTestCase {
     }
 
     func testNthPrimeButtonSuccessFlow() throws {
+        Current.nthPrime = { _ in .sync { 17 } }
+
         var store = CounterViewState(
             alertNthPrime: nil,
             targetNumber: 2,
@@ -76,12 +83,22 @@ final class CounterTests: XCTestCase {
         )
         XCTAssertEqual(effects.count, 1)
 
+        var nextAction: CounterViewAction!
+        let receivedCompletion = self.expectation(description: "receiveCompletion")
+        _ = effects[0].sink(
+          receiveCompletion: { _ in receivedCompletion.fulfill() },
+          receiveValue: { action in
+            nextAction = action
+            XCTAssertEqual(action, .counter(.nthPrimeResponse(17)))
+        })
+        self.wait(for: [receivedCompletion], timeout: 0.1)
+
         // API response
-        effects = counterViewReducer(&store, .counter(.nthPrimeResponse(3)))
+        effects = counterViewReducer(&store, nextAction)
         XCTAssertEqual(
             store,
             CounterViewState(
-                alertNthPrime: .init(prime: 3),
+                alertNthPrime: .init(prime: 17),
                 targetNumber: 2,
                 favoritePrimes: [],
                 isNthPrimeButtonDisabled: false
@@ -104,6 +121,8 @@ final class CounterTests: XCTestCase {
     }
 
     func testNthPrimeButtonUnsuccessFlow() throws {
+        Current.nthPrime = { _ in .sync { nil } }
+
         var store = CounterViewState(
             alertNthPrime: nil,
             targetNumber: 2,
@@ -125,8 +144,20 @@ final class CounterTests: XCTestCase {
         )
         XCTAssertEqual(effects.count, 1)
 
+        var nextAction: CounterViewAction!
+        let receivedCompletion = self.expectation(description: "receiveCompletion")
+        _ = effects[0].sink(
+            receiveCompletion: { _ in receivedCompletion.fulfill() },
+            receiveValue: { action in
+                nextAction = action
+                XCTAssertEqual(action, .counter(.nthPrimeResponse(nil)))
+            }
+        )
+        self.wait(for: [receivedCompletion], timeout: 0.01)
+
         // API response
-        effects = counterViewReducer(&store, .counter(.nthPrimeResponse(nil)))
+        effects = counterViewReducer(&store, nextAction)
+
         XCTAssertEqual(
             store,
             CounterViewState(
