@@ -38,6 +38,7 @@
 		83C67676299539DD0071D602 /* PrimeModal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83C67627298C90FC0071D602 /* PrimeModal.framework */; };
 		83C67677299539DD0071D602 /* PrimeModal.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83C67627298C90FC0071D602 /* PrimeModal.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		83C6767D29BB60480071D602 /* WolframAlpha.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C6767C29BB60480071D602 /* WolframAlpha.swift */; };
+		83C6768129CC9C310071D602 /* ComposableArchitectureTestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C6768029CC9C310071D602 /* ComposableArchitectureTestSupport.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -190,6 +191,7 @@
 		83C67673298DF1D20071D602 /* ComposableArchitecture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposableArchitecture.swift; sourceTree = "<group>"; };
 		83C6767B299A7B880071D602 /* PrimeTime.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = PrimeTime.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		83C6767C29BB60480071D602 /* WolframAlpha.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WolframAlpha.swift; sourceTree = "<group>"; };
+		83C6768029CC9C310071D602 /* ComposableArchitectureTestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposableArchitectureTestSupport.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -335,6 +337,7 @@
 			isa = PBXGroup;
 			children = (
 				83C675F2298C90DD0071D602 /* CounterTests.swift */,
+				83C6768029CC9C310071D602 /* ComposableArchitectureTestSupport.swift */,
 			);
 			path = CounterTests;
 			sourceTree = "<group>";
@@ -768,6 +771,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				83C675F3298C90DD0071D602 /* CounterTests.swift in Sources */,
+				83C6768129CC9C310071D602 /* ComposableArchitectureTestSupport.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
