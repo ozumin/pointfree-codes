@@ -91,8 +91,13 @@ enum AppAction {
     }
 }
 
-func activityFeed(_ reducer: @escaping Reducer<AppState, AppAction>) -> Reducer<AppState, AppAction> {
-    { value, action in
+typealias AppEnvironment = (
+    nthPrime: (Int) -> Effect<Int?>,
+    fileClient: FileClient
+)
+
+func activityFeed(_ reducer: @escaping Reducer<AppState, AppAction, AppEnvironment>) -> Reducer<AppState, AppAction, AppEnvironment> {
+    { value, action, environment in
         switch action {
         case
                 .counterView(.counter(_)),
@@ -107,14 +112,14 @@ func activityFeed(_ reducer: @escaping Reducer<AppState, AppAction>) -> Reducer<
         case let .favorite(.removeFromFavorite(number)):
             value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(number)))
         }
-        return reducer(&value, action)
+        return reducer(&value, action, environment)
     }
 }
 
 /// アプリで使うreducer
-let appReducer: Reducer<AppState, AppAction> = combine(
-    pullBack(counterViewReducer, value: \.counterViewState, action: \.counterView),
-    pullBack(favoriteReducer, value: \.favoritePrimesState, action: \.favorite)
+let appReducer: Reducer<AppState, AppAction, AppEnvironment> = combine(
+    pullBack(counterViewReducer, value: \.counterViewState, action: \.counterView, environment: { $0.nthPrime }),
+    pullBack(favoriteReducer, value: \.favoritePrimesState, action: \.favorite, environment: { $0.fileClient })
 )
 
 /// 大元のView
@@ -152,7 +157,8 @@ struct ContentView_Previews: PreviewProvider {
         ContentView(
             store: Store<AppState, AppAction>(
                 value: AppState(),
-                reducer: logging(activityFeed(appReducer))
+                reducer: logging(activityFeed(appReducer)),
+                environment: AppEnvironment(nthPrime: nthPrime, fileClient: .live)
             )
         )
     }

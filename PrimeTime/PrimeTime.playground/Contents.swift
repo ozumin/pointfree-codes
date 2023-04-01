@@ -27,8 +27,6 @@ import ComposableArchitecture
 
 @testable import Counter
 
-Current = .mock
-
 PlaygroundPage.current.setLiveView(
     CounterView(
         store: Store<CounterViewState, CounterViewAction>(
@@ -38,7 +36,8 @@ PlaygroundPage.current.setLiveView(
                 favoritePrimes: [1,2,3],
                 isNthPrimeButtonDisabled: false
             ),
-            reducer: counterViewReducer
+            reducer: counterViewReducer,
+            environment: { _ in .sync { 17 } }
         )
     )
 )

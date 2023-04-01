@@ -29,13 +29,13 @@ public struct PrimeAlert: Equatable, Identifiable {
     public var id: Int { self.prime }
 }
 
-public let counterViewReducer: Reducer<CounterViewState, CounterViewAction> = combine(
-    pullBack(counterReducer, value: \CounterViewState.counter, action: \.counter),
-    pullBack(primeResultReducer, value: \.primeModal, action: \.primeResult)
+public let counterViewReducer: Reducer<CounterViewState, CounterViewAction, CounterEnvironment> = combine(
+    pullBack(counterReducer, value: \CounterViewState.counter, action: \.counter, environment: { $0 }),
+    pullBack(primeResultReducer, value: \.primeModal, action: \.primeResult, environment: { _ in })
 )
 
 /// CounterViewでのreducer
-public func counterReducer(value: inout CounterState, action: CounterAction) -> [Effect<CounterAction>] {
+public func counterReducer(value: inout CounterState, action: CounterAction, environment: CounterEnvironment) -> [Effect<CounterAction>] {
     switch action {
     case .decreaseNumber:
         value.targetNumber -= 1
@@ -46,7 +46,7 @@ public func counterReducer(value: inout CounterState, action: CounterAction) -> 
     case .nthPrimeButtonTapped:
         value.isNthPrimeButtonDisabled = true
         return [
-            Current.nthPrime(value.targetNumber)
+            environment(value.targetNumber)
                 .map(CounterAction.nthPrimeResponse)
                 .receive(on: DispatchQueue.main)
                 .eraseToEffect()
@@ -119,17 +119,7 @@ public enum CounterViewAction: Equatable {
     }
 }
 
-var Current: CounterEnvironment = .live
-
-struct CounterEnvironment {
-
-    var nthPrime: (Int) -> Effect<Int?>
-}
-
-extension CounterEnvironment {
-
-    static let live = Self(nthPrime: Counter.nthPrime)
-}
+public typealias CounterEnvironment = (Int) -> Effect<Int?>
 
 /// カウンターのView
 public struct CounterView: View {
@@ -191,10 +181,3 @@ public struct CounterView: View {
         }
     }
 }
-
-#if DEBUG
-extension CounterEnvironment {
-
-    static let mock = Self(nthPrime: { _ in .sync { 17 } })
-}
-#endif

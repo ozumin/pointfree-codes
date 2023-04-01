@@ -10,15 +10,11 @@ import XCTest
 
 final class CounterTests: XCTestCase {
 
-    override func setUp() {
-        super.setUp()
-        Current = .mock
-    }
-
     func testIncreaseNumber() throws {
         assert(
             initialvalue: CounterViewState(targetNumber: 2),
             reducer: counterViewReducer,
+            environment: { _ in .sync { 17 } },
             steps:
                 Step(.send, .counter(.increaseNumber)) { $0.targetNumber = 3 },
             Step(.send, .counter(.increaseNumber)) { $0.targetNumber = 4 }
@@ -29,6 +25,7 @@ final class CounterTests: XCTestCase {
         assert(
             initialvalue: CounterViewState(targetNumber: 2),
             reducer: counterViewReducer,
+            environment: { _ in .sync { 17 } },
             steps:
                 Step(.send, .counter(.decreaseNumber)) { $0.targetNumber = 1 },
             Step(.send, .counter(.decreaseNumber)) { $0.targetNumber = 0 }
@@ -36,11 +33,10 @@ final class CounterTests: XCTestCase {
     }
 
     func testNthPrimeButtonSuccessFlow() throws {
-        Current.nthPrime = { _ in .sync { 17 } }
-
         assert(
             initialvalue: CounterViewState(alertNthPrime: nil, isNthPrimeButtonDisabled: false),
             reducer: counterViewReducer,
+            environment: { _ in .sync { 17 } },
             steps:
                 Step(.send, .counter(.nthPrimeButtonTapped)) {
                     $0.isNthPrimeButtonDisabled = true
@@ -56,11 +52,10 @@ final class CounterTests: XCTestCase {
     }
 
     func testNthPrimeButtonUnsuccessFlow() throws {
-        Current.nthPrime = { _ in .sync { nil } }
-
         assert(
             initialvalue: CounterViewState(alertNthPrime: nil, isNthPrimeButtonDisabled: false),
             reducer: counterViewReducer,
+            environment: { _ in .sync { nil } },
             steps:
                 Step(.send, .counter(.nthPrimeButtonTapped)) { $0.isNthPrimeButtonDisabled = true },
             Step(.receive, .counter(.nthPrimeResponse(nil))) { $0.isNthPrimeButtonDisabled = false },
@@ -72,6 +67,7 @@ final class CounterTests: XCTestCase {
         assert(
             initialvalue: CounterViewState(targetNumber: 2, favoritePrimes: []),
             reducer: counterViewReducer,
+            environment: { _ in .sync { 17 } },
             steps:
                 Step(.send, .primeResult(.addToFavorite)) { $0.favoritePrimes = [2] },
             Step(.send, .primeResult(.removeFromFavorite)) { $0.favoritePrimes = [] }

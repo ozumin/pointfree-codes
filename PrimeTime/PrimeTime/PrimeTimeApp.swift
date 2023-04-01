@@ -5,6 +5,7 @@
 //  Created by Mizuo Nagayama on 2023/02/03.
 //
 
+import Counter
 import ComposableArchitecture
 import SwiftUI
 
@@ -15,7 +16,11 @@ struct PrimeTimeApp: App {
             ContentView(
                 store: Store<AppState, AppAction>(
                     value: AppState(),
-                    reducer: logging(activityFeed(appReducer))
+                    reducer: logging(activityFeed(appReducer)),
+                    environment: AppEnvironment(
+                        nthPrime: nthPrime,
+                        fileClient: .live
+                    )
                 )
             )
         }

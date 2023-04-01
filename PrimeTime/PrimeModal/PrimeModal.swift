@@ -17,7 +17,7 @@ public enum PrimeResultAction: Equatable {
 }
 
 /// PrimeResultViewでのreducer
-public func primeResultReducer(value: inout PrimeModalState, action: PrimeResultAction) -> [Effect<PrimeResultAction>] {
+public func primeResultReducer(value: inout PrimeModalState, action: PrimeResultAction, environment: Void) -> [Effect<PrimeResultAction>] {
     switch action {
     case .addToFavorite:
         value.favoritePrimes.append(value.targetNumber)

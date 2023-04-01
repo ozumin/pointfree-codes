@@ -28,7 +28,7 @@ struct WolframAlphaResult: Decodable {
 }
 
 import Combine
-func nthPrime(_ n: Int) -> Effect<Int?> {
+public func nthPrime(_ n: Int) -> Effect<Int?> {
     Thread.sleep(forTimeInterval: 1)
     return Just(1111).eraseToEffect()
 //    return wolframAlpha(query: "prime \(n)")

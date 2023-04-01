@@ -18,7 +18,7 @@ public enum FavoriteAction: Equatable {
 }
 
 /// FavoriteViewで使うreducer
-public func favoriteReducer(value: inout [Int], action: FavoriteAction) -> [Effect<FavoriteAction>] {
+public func favoriteReducer(value: inout [Int], action: FavoriteAction, environment: FavoritePrimesEnvironment) -> [Effect<FavoriteAction>] {
     switch action {
     case .removeFromFavorite(let number):
         value.removeAll(where: { $0 == number })
@@ -28,13 +28,13 @@ public func favoriteReducer(value: inout [Int], action: FavoriteAction) -> [Effe
         return []
     case .saveButtonTapped:
         return [
-            Current.fileClient
+            environment
                 .save("favorite-primes.json", try! JSONEncoder().encode(value))
                 .fireAndForget()
         ]
     case .loadButtonTapped:
         return [
-            Current.fileClient
+            environment
                 .load("favorite-primes.json")
                 .compactMap { $0 }
                 .decode(type: [Int].self, decoder: JSONDecoder())
@@ -45,24 +45,16 @@ public func favoriteReducer(value: inout [Int], action: FavoriteAction) -> [Effe
     }
 }
 
-var Current = FavoritePrimesEnvironment.live
+public typealias FavoritePrimesEnvironment = FileClient
 
-struct FavoritePrimesEnvironment {
-    var fileClient: FileClient
-}
-
-extension FavoritePrimesEnvironment {
-    static let live = FavoritePrimesEnvironment(fileClient: .live)
-}
-
-struct FileClient {
+public struct FileClient {
     var load: (String) -> Effect<Data?>
     var save: (String, Data) -> Effect<Never>
 }
 
 extension FileClient {
 
-    static let live = FileClient(
+    public static let live = FileClient(
         load: { fileName in
                 .sync {
                     let documentsPath = NSSearchPathForDirectoriesInDomains(
@@ -126,12 +118,10 @@ public struct FavoritesView : View {
 }
 
 #if DEBUG
-extension FavoritePrimesEnvironment {
-    static let mock = FavoritePrimesEnvironment(
-        fileClient: .init(
-            load: { _ in Effect<Data?>.sync { try! JSONEncoder().encode([2, 31]) } },
-            save: { _, _ in .fireAndForget {} }
-        )
+extension FileClient {
+    static let mock = FileClient(
+        load: { _ in Effect<Data?>.sync { try! JSONEncoder().encode([2, 31]) } },
+        save: { _, _ in .fireAndForget {} }
     )
 }
 #endif
