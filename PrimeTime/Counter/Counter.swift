@@ -13,8 +13,8 @@ import SwiftUI
 public enum CounterAction: Equatable {
     case increaseNumber
     case decreaseNumber
-    case nthPrimeButtonTapped
-    case nthPrimeResponse(Int?)
+    case nthPrimeButtonTapped(Int)
+    case nthPrimeResponse(Int, Int?)
     case alertDismissButtonTapped
 }
 
@@ -25,8 +25,18 @@ public typealias CounterState = (
 )
 
 public struct PrimeAlert: Equatable, Identifiable {
-    let prime: Int
+    public let n: Int
+    public let prime: Int
     public var id: Int { self.prime }
+
+    public init(n: Int, prime: Int) {
+        self.n = n
+        self.prime = prime
+    }
+
+    public var title: String {
+        return "The \(n)th prime is \(prime)"
+    }
 }
 
 public let counterViewReducer: Reducer<CounterViewState, CounterViewAction, CounterEnvironment> = combine(
@@ -43,16 +53,16 @@ public func counterReducer(value: inout CounterState, action: CounterAction, env
     case .increaseNumber:
         value.targetNumber += 1
         return []
-    case .nthPrimeButtonTapped:
+    case .nthPrimeButtonTapped(let n):
         value.isNthPrimeButtonDisabled = true
         return [
             environment(value.targetNumber)
-                .map(CounterAction.nthPrimeResponse)
+                .map { CounterAction.nthPrimeResponse(n, $0) }
                 .receive(on: DispatchQueue.main)
                 .eraseToEffect()
         ]
-    case let .nthPrimeResponse(prime):
-        value.alertNthPrime = prime.map(PrimeAlert.init(prime:))
+    case let .nthPrimeResponse(n, prime):
+        value.alertNthPrime = prime.map { PrimeAlert.init(n: n, prime: $0) }
         value.isNthPrimeButtonDisabled = false
         return []
     case .alertDismissButtonTapped:
@@ -154,7 +164,7 @@ public struct CounterView: View {
                 Text("Is this prime?")
             }
             Button {
-                self.store.send(.counter(.nthPrimeButtonTapped))
+                self.store.send(.counter(.nthPrimeButtonTapped(store.value.targetNumber)))
             } label: {
                 Text("What is the \(store.value.targetNumber)th prime?")
             }
@@ -173,11 +183,27 @@ public struct CounterView: View {
             item: .constant(self.store.value.alertNthPrime)
         ) { alert in
             Alert(
-                title: Text("The \(self.store.value.targetNumber) prime is \(alert.prime)"),
+                title: Text(alert.title),
                 dismissButton: .default(Text("Ok")) {
                     self.store.send(.counter(.alertDismissButtonTapped))
                 }
             )
         }
     }
+}
+
+import Combine
+public func offlineNthPrime(_ n: Int) -> Effect<Int?> {
+    Future { callback in
+        var nthPrime = 1
+        var count = 0
+        while count <= n {
+            nthPrime += 1
+            if isPrime(nthPrime) {
+                count += 1
+            }
+        }
+        callback(.success(nthPrime))
+    }
+    .eraseToEffect()
 }

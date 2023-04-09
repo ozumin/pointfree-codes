@@ -62,7 +62,7 @@ public struct PrimeResultView: View {
 }
 
 /// 素数計算用の関数
-func isPrime(_ p: Int) -> Bool {
+public func isPrime(_ p: Int) -> Bool {
     if p <= 1 { return false }
     if p <= 3 { return true }
     for i in 2...Int(sqrtf(Float(p))) {

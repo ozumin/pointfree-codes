@@ -11,22 +11,27 @@ import XCTest
 final class FavoritePrimesTests: XCTestCase {
 
     func testRemoveFromFavorite() throws {
-        var store = [2, 3, 5]
-        let effects = favoriteReducer(value: &store, action: .removeFromFavorite(3), environment: .mock)
-        XCTAssertEqual(store, [2, 5])
+        var store = FavoritePrimesState(alertNthPrime: nil, favoritePrimes: [2, 3, 5])
+        let effects = favoriteReducer(value: &store, action: .removeFromFavorite(3), environment: (fileClient: .mock, nthPrime: { _ in .sync { 17 } }))
+        XCTAssertEqual(store.favoritePrimes, [2, 5])
         XCTAssert(effects.isEmpty)
     }
 
     func testSaveButtonTapped() throws {
         var didSave = false
 
-        var store = [2, 3, 5]
+        let fileClient = FileClient(
+            load: { _ in .sync { nil } },
+            save: { _, _ in .fireAndForget { didSave = true }}
+        )
+
+        var store = FavoritePrimesState(alertNthPrime: nil, favoritePrimes: [2, 3, 5])
         let effects = favoriteReducer(
             value: &store,
             action: .saveButtonTapped,
-            environment: .init(load: { _ in .sync { nil } }, save: { _, _ in .fireAndForget { didSave = true } })
+            environment: (fileClient: fileClient, nthPrime: { _ in .sync { 17 } })
         )
-        XCTAssertEqual(store, [2, 3, 5])
+        XCTAssertEqual(store.favoritePrimes, [2, 3, 5])
         XCTAssertEqual(effects.count, 1)
 
         _ = effects[0].sink { _ in XCTFail() }
@@ -34,9 +39,9 @@ final class FavoritePrimesTests: XCTestCase {
     }
 
     func testLoadButtonTapped() throws {
-        var store = [2, 3, 5]
-        var effects = favoriteReducer(value: &store, action: .loadButtonTapped, environment: .mock)
-        XCTAssertEqual(store, [2, 3, 5])
+        var store = FavoritePrimesState(alertNthPrime: nil, favoritePrimes: [2, 3, 5])
+        var effects = favoriteReducer(value: &store, action: .loadButtonTapped, environment: (fileClient: .mock, nthPrime: { _ in .sync { 17 } }))
+        XCTAssertEqual(store.favoritePrimes, [2, 3, 5])
         XCTAssertEqual(effects.count, 1)
 
         var nextAction: FavoriteAction!
@@ -52,8 +57,8 @@ final class FavoritePrimesTests: XCTestCase {
                 }
             )
         self.wait(for: [receivedCompletion], timeout: 0)
-        effects = favoriteReducer(value: &store, action: nextAction, environment: .mock)
-        XCTAssertEqual(store, [2, 31])
+        effects = favoriteReducer(value: &store, action: nextAction, environment: (fileClient: .mock, nthPrime: { _ in .sync { 17 } }))
+        XCTAssertEqual(store.favoritePrimes, [2, 31])
         XCTAssert(effects.isEmpty)
     }
 }

@@ -11,7 +11,7 @@ import FavoritePrimes
 import SwiftUI
 
 /// アプリの状態
-struct AppState {
+struct AppState: Equatable {
     var targetNumber: Int = 0
     var favoritePrimes: [Int] = []
     var loggedInUser: User? = nil
@@ -19,17 +19,17 @@ struct AppState {
     var alertNthPrime: PrimeAlert? = nil
     var isNthPrimeButtonDisabled: Bool = false
 
-    struct Activity {
+    struct Activity: Equatable {
         let timestamp: Date
         let type: ActivityType
 
-        enum ActivityType {
+        enum ActivityType: Equatable {
             case addedFavoritePrime(Int)
             case removedFavoritePrime(Int)
         }
     }
 
-    struct User {
+    struct User: Equatable {
         let id: Int
         let name: String
         let bio: String
@@ -39,12 +39,13 @@ struct AppState {
 extension AppState {
 
     /// これによってpullBack()で使うkeyPathが取得できる
-    var favoritePrimesState: [Int] {
+    var favoritePrimesState: FavoritePrimesState {
         get {
-            favoritePrimes
+            .init(alertNthPrime: alertNthPrime, favoritePrimes: favoritePrimes)
         }
         set {
-            favoritePrimes = newValue
+            alertNthPrime = newValue.alertNthPrime
+            favoritePrimes = newValue.favoritePrimes
         }
     }
 
@@ -62,8 +63,9 @@ extension AppState {
 }
 
 /// アプリ全体のアクション
-enum AppAction {
+enum AppAction: Equatable {
     case counterView(CounterViewAction)
+    case offlineCounterView(CounterViewAction)
     case favorite(FavoriteAction)
 
     /// enumでKeyPathを取得するためのワークアラウンド
@@ -75,6 +77,18 @@ enum AppAction {
         set {
             guard case .counterView = self, let newValue = newValue else { return }
             self = .counterView(newValue)
+        }
+    }
+
+    /// enumでKeyPathを取得するためのワークアラウンド
+    var offlineCounterView: CounterViewAction? {
+        get {
+            guard case let .offlineCounterView(value) = self else { return nil }
+            return value
+        }
+        set {
+            guard case .offlineCounterView = self, let newValue = newValue else { return }
+            self = .offlineCounterView(newValue)
         }
     }
 
@@ -93,6 +107,7 @@ enum AppAction {
 
 typealias AppEnvironment = (
     nthPrime: (Int) -> Effect<Int?>,
+    offlineNthPrime: (Int) -> Effect<Int?>,
     fileClient: FileClient
 )
 
@@ -101,13 +116,17 @@ func activityFeed(_ reducer: @escaping Reducer<AppState, AppAction, AppEnvironme
         switch action {
         case
                 .counterView(.counter(_)),
+                .offlineCounterView(.counter(_)),
                 .favorite(.loadedFavoritePrimes(_)),
                 .favorite(.saveButtonTapped),
-                .favorite(.loadButtonTapped):
+                .favorite(.loadButtonTapped),
+                .favorite(.nthPrimeResponse),
+                .favorite(.primeButtonTapped),
+                .favorite(.alertDismissButtonTapped):
             break
-        case .counterView(.primeResult(.addToFavorite)):
+        case .counterView(.primeResult(.addToFavorite)), .offlineCounterView(.primeResult(.addToFavorite)):
             value.activityFeed.append(.init(timestamp: .now, type: .addedFavoritePrime(value.targetNumber)))
-        case .counterView(.primeResult(.removeFromFavorite)):
+        case .counterView(.primeResult(.removeFromFavorite)), .offlineCounterView(.primeResult(.removeFromFavorite)):
             value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(value.targetNumber)))
         case let .favorite(.removeFromFavorite(number)):
             value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(number)))
@@ -119,7 +138,8 @@ func activityFeed(_ reducer: @escaping Reducer<AppState, AppAction, AppEnvironme
 /// アプリで使うreducer
 let appReducer: Reducer<AppState, AppAction, AppEnvironment> = combine(
     pullBack(counterViewReducer, value: \.counterViewState, action: \.counterView, environment: { $0.nthPrime }),
-    pullBack(favoriteReducer, value: \.favoritePrimesState, action: \.favorite, environment: { $0.fileClient })
+    pullBack(counterViewReducer, value: \.counterViewState, action: \.offlineCounterView, environment: { $0.offlineNthPrime }),
+    pullBack(favoriteReducer, value: \.favoritePrimesState, action: \.favorite, environment: { (fileClient: $0.fileClient, nthPrime: nthPrime) })
 )
 
 /// 大元のView
@@ -137,6 +157,14 @@ struct ContentView: View {
                     ))
                 } label: {
                     Text("Counter demo")
+                }
+                NavigationLink {
+                    CounterView(store: store.view(
+                        value: { $0.counterViewState },
+                        action: { .offlineCounterView($0) }
+                    ))
+                } label: {
+                    Text("Offline counter demo")
                 }
                 NavigationLink {
                     FavoritesView(store: store.view(
@@ -158,7 +186,7 @@ struct ContentView_Previews: PreviewProvider {
             store: Store<AppState, AppAction>(
                 value: AppState(),
                 reducer: logging(activityFeed(appReducer)),
-                environment: AppEnvironment(nthPrime: nthPrime, fileClient: .live)
+                environment: AppEnvironment(nthPrime: nthPrime, offlineNthPrime: offlineNthPrime, fileClient: .live)
             )
         )
     }

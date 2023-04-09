@@ -5,6 +5,7 @@
 //  Created by Mizuo Nagayama on 2023/02/03.
 //
 
+import ComposableArchitectureTestSupport
 import XCTest
 @testable import Counter
 
@@ -38,11 +39,11 @@ final class CounterTests: XCTestCase {
             reducer: counterViewReducer,
             environment: { _ in .sync { 17 } },
             steps:
-                Step(.send, .counter(.nthPrimeButtonTapped)) {
+                Step(.send, .counter(.nthPrimeButtonTapped(2))) {
                     $0.isNthPrimeButtonDisabled = true
                 },
-            Step(.receive, .counter(.nthPrimeResponse(17))) {
-                $0.alertNthPrime = .init(prime: 17)
+            Step(.receive, .counter(.nthPrimeResponse(2, 17))) {
+                $0.alertNthPrime = .init(n: 2, prime: 17)
                 $0.isNthPrimeButtonDisabled = false
             },
             Step(.send, .counter(.alertDismissButtonTapped)) {
@@ -57,8 +58,8 @@ final class CounterTests: XCTestCase {
             reducer: counterViewReducer,
             environment: { _ in .sync { nil } },
             steps:
-                Step(.send, .counter(.nthPrimeButtonTapped)) { $0.isNthPrimeButtonDisabled = true },
-            Step(.receive, .counter(.nthPrimeResponse(nil))) { $0.isNthPrimeButtonDisabled = false },
+                Step(.send, .counter(.nthPrimeButtonTapped(2))) { $0.isNthPrimeButtonDisabled = true },
+            Step(.receive, .counter(.nthPrimeResponse(2, nil))) { $0.isNthPrimeButtonDisabled = false },
             Step(.send, .counter(.alertDismissButtonTapped)) { _ in }
         )
     }

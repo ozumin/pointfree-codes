@@ -10,9 +10,9 @@ import ComposableArchitecture
 import Foundation
 import XCTest
 
-struct Step<Value, Action> {
+public struct Step<Value, Action> {
 
-    enum StepType {
+    public enum StepType {
         case send
         case receive
     }
@@ -23,7 +23,7 @@ struct Step<Value, Action> {
     let line: UInt
     let update: (inout Value) -> Void
 
-    init(_ type: StepType, _ action: Action, file: StaticString = #file, line: UInt = #line, _ update: @escaping (inout Value) -> Void) {
+    public init(_ type: StepType, _ action: Action, file: StaticString = #file, line: UInt = #line, _ update: @escaping (inout Value) -> Void) {
         self.type = type
         self.action = action
         self.file = file
@@ -32,7 +32,7 @@ struct Step<Value, Action> {
     }
 }
 
-func assert<Value: Equatable, Action: Equatable, Environment>(
+public func assert<Value: Equatable, Action: Equatable, Environment>(
     initialvalue: Value,
     reducer: Reducer<Value, Action, Environment>,
     environment: Environment,

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8362283729E2ACDD008DD47C /* PrimeTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8362283629E2ACDD008DD47C /* PrimeTimeTests.swift */; };
 		83C675D0298C8E350071D602 /* PrimeTimeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C675CF298C8E350071D602 /* PrimeTimeApp.swift */; };
 		83C675D2298C8E350071D602 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C675D1298C8E350071D602 /* ContentView.swift */; };
 		83C675D4298C8E360071D602 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83C675D3298C8E360071D602 /* Assets.xcassets */; };
@@ -38,10 +39,20 @@
 		83C67676299539DD0071D602 /* PrimeModal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83C67627298C90FC0071D602 /* PrimeModal.framework */; };
 		83C67677299539DD0071D602 /* PrimeModal.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83C67627298C90FC0071D602 /* PrimeModal.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		83C6767D29BB60480071D602 /* WolframAlpha.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C6767C29BB60480071D602 /* WolframAlpha.swift */; };
-		83C6768129CC9C310071D602 /* ComposableArchitectureTestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C6768029CC9C310071D602 /* ComposableArchitectureTestSupport.swift */; };
+		83C676B029DB0A0F0071D602 /* ComposableArchitectureTestSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 83C676AD29DB0A0F0071D602 /* ComposableArchitectureTestSupport.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83C676B329DB0A0F0071D602 /* ComposableArchitectureTestSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83C676AB29DB0A0F0071D602 /* ComposableArchitectureTestSupport.framework */; };
+		83C676B429DB0A0F0071D602 /* ComposableArchitectureTestSupport.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83C676AB29DB0A0F0071D602 /* ComposableArchitectureTestSupport.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		83C676B829DB0A220071D602 /* ComposableArchitectureTestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C6768029CC9C310071D602 /* ComposableArchitectureTestSupport.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		8362283829E2ACDD008DD47C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83C675C4298C8E350071D602 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 83C675CB298C8E350071D602;
+			remoteInfo = PrimeTime;
+		};
 		83C675ED298C90DD0071D602 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 83C675C4298C8E350071D602 /* Project object */;
@@ -133,6 +144,13 @@
 			remoteGlobalIDString = 83C67626298C90FC0071D602;
 			remoteInfo = PrimeModal;
 		};
+		83C676B129DB0A0F0071D602 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83C675C4298C8E350071D602 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 83C676AA29DB0A0F0071D602;
+			remoteInfo = ComposableArchitectureTestSupport;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -145,6 +163,7 @@
 				83C67662298C92230071D602 /* ComposableArchitecture.framework in Embed Frameworks */,
 				83C6761B298C90F20071D602 /* FavoritePrimes.framework in Embed Frameworks */,
 				83C675F8298C90DD0071D602 /* Counter.framework in Embed Frameworks */,
+				83C676B429DB0A0F0071D602 /* ComposableArchitectureTestSupport.framework in Embed Frameworks */,
 				83C6763D298C90FC0071D602 /* PrimeModal.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -164,6 +183,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8362283429E2ACDD008DD47C /* PrimeTimeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PrimeTimeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8362283629E2ACDD008DD47C /* PrimeTimeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimeTimeTests.swift; sourceTree = "<group>"; };
 		83C675CC298C8E350071D602 /* PrimeTime.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PrimeTime.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		83C675CF298C8E350071D602 /* PrimeTimeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimeTimeApp.swift; sourceTree = "<group>"; };
 		83C675D1298C8E350071D602 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -192,9 +213,20 @@
 		83C6767B299A7B880071D602 /* PrimeTime.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = PrimeTime.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		83C6767C29BB60480071D602 /* WolframAlpha.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WolframAlpha.swift; sourceTree = "<group>"; };
 		83C6768029CC9C310071D602 /* ComposableArchitectureTestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposableArchitectureTestSupport.swift; sourceTree = "<group>"; };
+		83C676AB29DB0A0F0071D602 /* ComposableArchitectureTestSupport.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ComposableArchitectureTestSupport.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		83C676AD29DB0A0F0071D602 /* ComposableArchitectureTestSupport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ComposableArchitectureTestSupport.h; sourceTree = "<group>"; };
+		83C676B929DB0B810071D602 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		83C676BD29DB19480071D602 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		8362283129E2ACDD008DD47C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		83C675C9298C8E350071D602 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -202,6 +234,7 @@
 				83C67661298C92230071D602 /* ComposableArchitecture.framework in Frameworks */,
 				83C6761A298C90F20071D602 /* FavoritePrimes.framework in Frameworks */,
 				83C675F7298C90DD0071D602 /* Counter.framework in Frameworks */,
+				83C676B329DB0A0F0071D602 /* ComposableArchitectureTestSupport.framework in Frameworks */,
 				83C6763C298C90FC0071D602 /* PrimeModal.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -267,9 +300,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		83C676A829DB0A0F0071D602 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8362283529E2ACDD008DD47C /* PrimeTimeTests */ = {
+			isa = PBXGroup;
+			children = (
+				8362283629E2ACDD008DD47C /* PrimeTimeTests.swift */,
+			);
+			path = PrimeTimeTests;
+			sourceTree = "<group>";
+		};
 		83C675C3298C8E350071D602 = {
 			isa = PBXGroup;
 			children = (
@@ -283,6 +331,8 @@
 				83C67636298C90FC0071D602 /* PrimeModalTests */,
 				83C6764D298C92230071D602 /* ComposableArchitecture */,
 				83C6765B298C92230071D602 /* ComposableArchitectureTests */,
+				83C676AC29DB0A0F0071D602 /* ComposableArchitectureTestSupport */,
+				8362283529E2ACDD008DD47C /* PrimeTimeTests */,
 				83C675CD298C8E350071D602 /* Products */,
 				83C67675299539DD0071D602 /* Frameworks */,
 			);
@@ -300,6 +350,8 @@
 				83C67630298C90FC0071D602 /* PrimeModalTests.xctest */,
 				83C6764C298C92230071D602 /* ComposableArchitecture.framework */,
 				83C67655298C92230071D602 /* ComposableArchitectureTests.xctest */,
+				83C676AB29DB0A0F0071D602 /* ComposableArchitectureTestSupport.framework */,
+				8362283429E2ACDD008DD47C /* PrimeTimeTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -337,7 +389,6 @@
 			isa = PBXGroup;
 			children = (
 				83C675F2298C90DD0071D602 /* CounterTests.swift */,
-				83C6768029CC9C310071D602 /* ComposableArchitectureTestSupport.swift */,
 			);
 			path = CounterTests;
 			sourceTree = "<group>";
@@ -396,8 +447,19 @@
 		83C67675299539DD0071D602 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				83C676B929DB0B810071D602 /* XCTest.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		83C676AC29DB0A0F0071D602 /* ComposableArchitectureTestSupport */ = {
+			isa = PBXGroup;
+			children = (
+				83C676BD29DB19480071D602 /* Info.plist */,
+				83C6768029CC9C310071D602 /* ComposableArchitectureTestSupport.swift */,
+				83C676AD29DB0A0F0071D602 /* ComposableArchitectureTestSupport.h */,
+			);
+			path = ComposableArchitectureTestSupport;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -435,9 +497,35 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		83C676A629DB0A0F0071D602 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83C676B029DB0A0F0071D602 /* ComposableArchitectureTestSupport.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		8362283329E2ACDD008DD47C /* PrimeTimeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8362283A29E2ACDD008DD47C /* Build configuration list for PBXNativeTarget "PrimeTimeTests" */;
+			buildPhases = (
+				8362283029E2ACDD008DD47C /* Sources */,
+				8362283129E2ACDD008DD47C /* Frameworks */,
+				8362283229E2ACDD008DD47C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8362283929E2ACDD008DD47C /* PBXTargetDependency */,
+			);
+			name = PrimeTimeTests;
+			productName = PrimeTimeTests;
+			productReference = 8362283429E2ACDD008DD47C /* PrimeTimeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		83C675CB298C8E350071D602 /* PrimeTime */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 83C675DA298C8E360071D602 /* Build configuration list for PBXNativeTarget "PrimeTime" */;
@@ -454,6 +542,7 @@
 				83C67619298C90F20071D602 /* PBXTargetDependency */,
 				83C6763B298C90FC0071D602 /* PBXTargetDependency */,
 				83C67660298C92230071D602 /* PBXTargetDependency */,
+				83C676B229DB0A0F0071D602 /* PBXTargetDependency */,
 			);
 			name = PrimeTime;
 			productName = PrimeTime;
@@ -610,6 +699,24 @@
 			productReference = 83C67655298C92230071D602 /* ComposableArchitectureTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		83C676AA29DB0A0F0071D602 /* ComposableArchitectureTestSupport */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 83C676B529DB0A0F0071D602 /* Build configuration list for PBXNativeTarget "ComposableArchitectureTestSupport" */;
+			buildPhases = (
+				83C676A629DB0A0F0071D602 /* Headers */,
+				83C676A729DB0A0F0071D602 /* Sources */,
+				83C676A829DB0A0F0071D602 /* Frameworks */,
+				83C676A929DB0A0F0071D602 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ComposableArchitectureTestSupport;
+			productName = ComposableArchitectureTestSupport;
+			productReference = 83C676AB29DB0A0F0071D602 /* ComposableArchitectureTestSupport.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -620,6 +727,10 @@
 				LastSwiftUpdateCheck = 1400;
 				LastUpgradeCheck = 1400;
 				TargetAttributes = {
+					8362283329E2ACDD008DD47C = {
+						CreatedOnToolsVersion = 14.0.1;
+						TestTargetID = 83C675CB298C8E350071D602;
+					};
 					83C675CB298C8E350071D602 = {
 						CreatedOnToolsVersion = 14.0.1;
 					};
@@ -649,7 +760,9 @@
 					};
 					83C67654298C92230071D602 = {
 						CreatedOnToolsVersion = 14.0.1;
-						TestTargetID = 83C675CB298C8E350071D602;
+					};
+					83C676AA29DB0A0F0071D602 = {
+						CreatedOnToolsVersion = 14.0.1;
 					};
 				};
 			};
@@ -675,11 +788,20 @@
 				83C6762F298C90FC0071D602 /* PrimeModalTests */,
 				83C6764B298C92230071D602 /* ComposableArchitecture */,
 				83C67654298C92230071D602 /* ComposableArchitectureTests */,
+				83C676AA29DB0A0F0071D602 /* ComposableArchitectureTestSupport */,
+				8362283329E2ACDD008DD47C /* PrimeTimeTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		8362283229E2ACDD008DD47C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		83C675CA298C8E350071D602 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -745,9 +867,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		83C676A929DB0A0F0071D602 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		8362283029E2ACDD008DD47C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8362283729E2ACDD008DD47C /* PrimeTimeTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		83C675C8298C8E350071D602 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -771,7 +908,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				83C675F3298C90DD0071D602 /* CounterTests.swift in Sources */,
-				83C6768129CC9C310071D602 /* ComposableArchitectureTestSupport.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -823,9 +959,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		83C676A729DB0A0F0071D602 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83C676B829DB0A220071D602 /* ComposableArchitectureTestSupport.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		8362283929E2ACDD008DD47C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 83C675CB298C8E350071D602 /* PrimeTime */;
+			targetProxy = 8362283829E2ACDD008DD47C /* PBXContainerItemProxy */;
+		};
 		83C675EE298C90DD0071D602 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 83C675E1298C90DD0071D602 /* Counter */;
@@ -891,9 +1040,50 @@
 			target = 83C67626298C90FC0071D602 /* PrimeModal */;
 			targetProxy = 83C67678299539DD0071D602 /* PBXContainerItemProxy */;
 		};
+		83C676B229DB0A0F0071D602 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 83C676AA29DB0A0F0071D602 /* ComposableArchitectureTestSupport */;
+			targetProxy = 83C676B129DB0A0F0071D602 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		8362283B29E2ACDD008DD47C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6ZWWVQ9869;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ozumin.PrimeTimeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
+			};
+			name = Debug;
+		};
+		8362283C29E2ACDD008DD47C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6ZWWVQ9869;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ozumin.PrimeTimeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
+			};
+			name = Release;
+		};
 		83C675D8298C8E360071D602 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1383,6 +1573,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				USER_HEADER_SEARCH_PATHS = "";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -1414,6 +1605,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				USER_HEADER_SEARCH_PATHS = "";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -1433,7 +1625,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
 		};
@@ -1451,13 +1643,108 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Release;
+		};
+		83C676B629DB0A0F0071D602 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 6ZWWVQ9869;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXCLUDED_SOURCE_FILE_NAMES = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ComposableArchitectureTestSupport/Info.plist;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				LD_VERIFY_BITCODE = NO;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-weak_framework",
+					XCTest,
+					"-weak-lXCTestSwiftSupport",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ozumin.ComposableArchitectureTestSupport;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		83C676B729DB0A0F0071D602 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 6ZWWVQ9869;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXCLUDED_SOURCE_FILE_NAMES = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ComposableArchitectureTestSupport/Info.plist;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				LD_VERIFY_BITCODE = NO;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-weak_framework",
+					XCTest,
+					"-weak-lXCTestSwiftSupport",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ozumin.ComposableArchitectureTestSupport;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		8362283A29E2ACDD008DD47C /* Build configuration list for PBXNativeTarget "PrimeTimeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8362283B29E2ACDD008DD47C /* Debug */,
+				8362283C29E2ACDD008DD47C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		83C675C7298C8E350071D602 /* Build configuration list for PBXProject "PrimeTime" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1544,6 +1831,15 @@
 			buildConfigurations = (
 				83C67667298C92230071D602 /* Debug */,
 				83C67668298C92230071D602 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		83C676B529DB0A0F0071D602 /* Build configuration list for PBXNativeTarget "ComposableArchitectureTestSupport" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83C676B629DB0A0F0071D602 /* Debug */,
+				83C676B729DB0A0F0071D602 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

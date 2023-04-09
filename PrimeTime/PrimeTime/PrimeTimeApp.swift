@@ -19,6 +19,7 @@ struct PrimeTimeApp: App {
                     reducer: logging(activityFeed(appReducer)),
                     environment: AppEnvironment(
                         nthPrime: nthPrime,
+                        offlineNthPrime: offlineNthPrime,
                         fileClient: .live
                     )
                 )
