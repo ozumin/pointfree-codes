@@ -29,12 +29,12 @@ import ComposableArchitecture
 
 PlaygroundPage.current.setLiveView(
     CounterView(
-        store: Store<CounterViewState, CounterViewAction>(
-            value: CounterViewState(
+        store: Store<CounterFeatureState, CounterFeatureAction>(
+            value: CounterFeatureState(
                 alertNthPrime: nil,
                 targetNumber: 3,
                 favoritePrimes: [1,2,3],
-                isNthPrimeButtonDisabled: false
+                isNthPrimeRequestInFlight: false
             ),
             reducer: counterViewReducer,
             environment: { _ in .sync { 17 } }

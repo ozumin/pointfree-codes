@@ -84,8 +84,17 @@ public func combine<Value, Action, Environment>(
     }
 }
 
+public final class ViewStore<Value>: ObservableObject {
+    @Published public fileprivate(set) var value: Value
+    fileprivate var cancellable: Cancellable?
+
+    public init(initialValue: Value) {
+        self.value = initialValue
+    }
+}
+
 /// Actionを元にValueを書き換えるためのストア
-public final class Store<Value, Action>: ObservableObject {
+public final class Store<Value, Action> {
 
     private let reducer: Reducer<Value, Action, Any>
     private let environment: Any
@@ -120,7 +129,7 @@ public final class Store<Value, Action>: ObservableObject {
         }
     }
 
-    public func view<LocalValue, LocalAction>(
+    public func scope<LocalValue, LocalAction>(
         value toLocalValue: @escaping (Value) -> LocalValue,
         action toGlobalAction: @escaping (LocalAction) -> Action
     ) -> Store<LocalValue, LocalAction> {
@@ -138,6 +147,23 @@ public final class Store<Value, Action>: ObservableObject {
         }
         return store
     }
+}
+
+extension Store {
+    public func view(removeDuplicates predicate: @escaping (Value, Value) -> Bool) -> ViewStore<Value> {
+        let viewStore = ViewStore(initialValue: self.value)
+        viewStore.cancellable = self.$value.sink(receiveValue: { [weak viewStore] newValue in
+            viewStore?.value = newValue
+            self
+        })
+        return viewStore
+    }
+}
+
+extension Store where Value: Equatable {
+    public var view: ViewStore<Value> {
+        self.view(removeDuplicates: ==)
+      }
 }
 
 public func logging<Value, Action, Environment>(

@@ -31,17 +31,26 @@ public func primeResultReducer(value: inout PrimeModalState, action: PrimeResult
 /// CounterViewでsheet表示する素数の結果のView
 public struct PrimeResultView: View {
 
-    @ObservedObject var store: Store<PrimeModalState, PrimeResultAction>
+    struct State: Equatable {
+        let targetNumber: Int
+        let isFavorite: Bool
+    }
+
+    let store: Store<PrimeModalState, PrimeResultAction>
+    @ObservedObject var viewStore: ViewStore<State>
 
     public init(store: Store<PrimeModalState, PrimeResultAction>) {
         self.store = store
+        self.viewStore = store
+            .scope(value: State.init(primeModalState:), action: { $0 })
+            .view
     }
 
     public var body: some View {
         VStack {
-            if isPrime(store.value.targetNumber) {
-                Text("\(store.value.targetNumber) is prime 🎉")
-                if store.value.favoritePrimes.contains(store.value.targetNumber) {
+            if isPrime(viewStore.value.targetNumber) {
+                Text("\(viewStore.value.targetNumber) is prime 🎉")
+                if viewStore.value.isFavorite {
                     Button {
                         store.send(.removeFromFavorite)
                     } label: {
@@ -58,6 +67,13 @@ public struct PrimeResultView: View {
                 Text("\(store.value.targetNumber) is not prime 😢")
             }
         }
+    }
+}
+
+extension PrimeResultView.State {
+    init(primeModalState: PrimeModalState) {
+        self.targetNumber = primeModalState.targetNumber
+        self.isFavorite = primeModalState.favoritePrimes.contains(primeModalState.targetNumber)
     }
 }
 

@@ -39,8 +39,8 @@ public struct PrimeAlert: Equatable, Identifiable {
     }
 }
 
-public let counterViewReducer: Reducer<CounterViewState, CounterViewAction, CounterEnvironment> = combine(
-    pullBack(counterReducer, value: \CounterViewState.counter, action: \.counter, environment: { $0 }),
+public let counterViewReducer: Reducer<CounterFeatureState, CounterFeatureAction, CounterEnvironment> = combine(
+    pullBack(counterReducer, value: \CounterFeatureState.counter, action: \.counter, environment: { $0 }),
     pullBack(primeResultReducer, value: \.primeModal, action: \.primeResult, environment: { _ in })
 )
 
@@ -71,27 +71,27 @@ public func counterReducer(value: inout CounterState, action: CounterAction, env
     }
 }
 
-public struct CounterViewState: Equatable {
+public struct CounterFeatureState: Equatable {
     public var alertNthPrime: PrimeAlert?
     public var targetNumber: Int
     public var favoritePrimes: [Int]
-    public var isNthPrimeButtonDisabled: Bool
+    public var isNthPrimeRequestInFlight: Bool
 
     public init(
         alertNthPrime: PrimeAlert? = nil,
         targetNumber: Int = 0,
         favoritePrimes: [Int] = [],
-        isNthPrimeButtonDisabled: Bool = false
-      ) {
+        isNthPrimeRequestInFlight: Bool = false
+    ) {
         self.alertNthPrime = alertNthPrime
         self.targetNumber = targetNumber
         self.favoritePrimes = favoritePrimes
-        self.isNthPrimeButtonDisabled = isNthPrimeButtonDisabled
-      }
+        self.isNthPrimeRequestInFlight = isNthPrimeRequestInFlight
+    }
 
     var counter: CounterState {
-        get { (self.alertNthPrime, self.targetNumber, self.isNthPrimeButtonDisabled) }
-        set { (self.alertNthPrime, self.targetNumber, self.isNthPrimeButtonDisabled) = newValue }
+        get { (self.alertNthPrime, self.targetNumber, self.isNthPrimeRequestInFlight) }
+        set { (self.alertNthPrime, self.targetNumber, self.isNthPrimeRequestInFlight) = newValue }
     }
 
     var primeModal: PrimeModalState {
@@ -100,7 +100,7 @@ public struct CounterViewState: Equatable {
     }
 }
 
-public enum CounterViewAction: Equatable {
+public enum CounterFeatureAction: Equatable {
     case counter(CounterAction)
     case primeResult(PrimeResultAction)
 
@@ -134,12 +134,22 @@ public typealias CounterEnvironment = (Int) -> Effect<Int?>
 /// カウンターのView
 public struct CounterView: View {
 
-    @ObservedObject var store: Store<CounterViewState, CounterViewAction>
+    struct CounterViewState: Equatable {
+        let targetNumber: Int
+        let isNthPrimeButtonDisabled: Bool
+        let alertNthPrime: PrimeAlert?
+        let isIncrementButtonDisabled: Bool
+        let isDecrementButtonDisabled: Bool
+    }
+
+    let store: Store<CounterFeatureState, CounterFeatureAction>
+    @ObservedObject var viewStore: ViewStore<CounterViewState>
 
     @State var showResultSheet: Bool = false
 
-    public init(store: Store<CounterViewState, CounterViewAction>) {
+    public init(store: Store<CounterFeatureState, CounterFeatureAction>) {
         self.store = store
+        self.viewStore = store.scope(value: CounterViewState.init(counterFeatureState:), action: { $0 }).view
     }
 
     public var body: some View {
@@ -151,12 +161,14 @@ public struct CounterView: View {
                 } label: {
                     Text("-")
                 }
-                Text("\(store.value.targetNumber)")
+                .disabled(self.viewStore.value.isDecrementButtonDisabled)
+                Text("\(viewStore.value.targetNumber)")
                 Button {
                     store.send(.counter(.increaseNumber))
                 } label: {
                     Text("+")
                 }
+                .disabled(self.viewStore.value.isIncrementButtonDisabled)
             }
             Button {
                 showResultSheet = true
@@ -164,23 +176,23 @@ public struct CounterView: View {
                 Text("Is this prime?")
             }
             Button {
-                self.store.send(.counter(.nthPrimeButtonTapped(store.value.targetNumber)))
+                self.store.send(.counter(.nthPrimeButtonTapped(viewStore.value.targetNumber)))
             } label: {
-                Text("What is the \(store.value.targetNumber)th prime?")
+                Text("What is the \(viewStore.value.targetNumber)th prime?")
             }
-            .disabled(self.store.value.isNthPrimeButtonDisabled)
+            .disabled(self.viewStore.value.isNthPrimeButtonDisabled)
             Spacer()
         }
         .sheet(isPresented: $showResultSheet) {
             PrimeResultView(
-                store: store.view(
+                store: store.scope(
                     value: { $0.primeModal },
                     action: { .primeResult($0) }
                 )
             )
         }
         .alert(
-            item: .constant(self.store.value.alertNthPrime)
+            item: .constant(self.viewStore.value.alertNthPrime)
         ) { alert in
             Alert(
                 title: Text(alert.title),
@@ -189,6 +201,16 @@ public struct CounterView: View {
                 }
             )
         }
+    }
+}
+
+extension CounterView.CounterViewState {
+    init(counterFeatureState: CounterFeatureState) {
+        self.alertNthPrime = counterFeatureState.alertNthPrime
+        self.targetNumber = counterFeatureState.targetNumber
+        self.isNthPrimeButtonDisabled = counterFeatureState.isNthPrimeRequestInFlight
+        self.isIncrementButtonDisabled = counterFeatureState.isNthPrimeRequestInFlight
+        self.isDecrementButtonDisabled = counterFeatureState.isNthPrimeRequestInFlight
     }
 }
 

@@ -64,7 +64,7 @@ public func favoriteReducer(value: inout FavoritePrimesState, action: FavoriteAc
 
 public typealias FavoritePrimesEnvironment = (fileClient: FileClient, nthPrime: (Int) -> Effect<Int?>)
 
-public struct FavoritePrimesState {
+public struct FavoritePrimesState: Equatable {
     public var alertNthPrime: PrimeAlert?
     public var favoritePrimes: [Int]
 
@@ -110,15 +110,17 @@ extension FileClient {
 /// お気に入りの素数一覧のView
 public struct FavoritesView : View {
 
-    @ObservedObject var store: Store<FavoritePrimesState, FavoriteAction>
+    let store: Store<FavoritePrimesState, FavoriteAction>
+    @ObservedObject var viewStore: ViewStore<FavoritePrimesState>
 
     public init(store: Store<FavoritePrimesState, FavoriteAction>) {
         self.store = store
+        self.viewStore = store.view
     }
 
     public var body: some View {
         List {
-            ForEach(store.value.favoritePrimes, id: \.self) { prime in
+            ForEach(viewStore.value.favoritePrimes, id: \.self) { prime in
                 Button {
                     store.send(.primeButtonTapped(prime))
                 } label: {

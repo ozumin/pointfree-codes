@@ -17,7 +17,7 @@ struct AppState: Equatable {
     var loggedInUser: User? = nil
     var activityFeed: [Activity] = []
     var alertNthPrime: PrimeAlert? = nil
-    var isNthPrimeButtonDisabled: Bool = false
+    var isNthPrimeRequestInFlight: Bool = false
 
     struct Activity: Equatable {
         let timestamp: Date
@@ -49,27 +49,27 @@ extension AppState {
         }
     }
 
-    var counterViewState: CounterViewState {
+    var counterViewState: CounterFeatureState {
         get {
-            CounterViewState(alertNthPrime: alertNthPrime, targetNumber: targetNumber, favoritePrimes: favoritePrimes, isNthPrimeButtonDisabled: isNthPrimeButtonDisabled)
+            CounterFeatureState(alertNthPrime: alertNthPrime, targetNumber: targetNumber, favoritePrimes: favoritePrimes, isNthPrimeRequestInFlight: isNthPrimeRequestInFlight)
         }
         set {
             targetNumber = newValue.targetNumber
             favoritePrimes = newValue.favoritePrimes
             alertNthPrime = newValue.alertNthPrime
-            isNthPrimeButtonDisabled = newValue.isNthPrimeButtonDisabled
+            isNthPrimeRequestInFlight = newValue.isNthPrimeRequestInFlight
         }
     }
 }
 
 /// アプリ全体のアクション
 enum AppAction: Equatable {
-    case counterView(CounterViewAction)
-    case offlineCounterView(CounterViewAction)
+    case counterView(CounterFeatureAction)
+    case offlineCounterView(CounterFeatureAction)
     case favorite(FavoriteAction)
 
     /// enumでKeyPathを取得するためのワークアラウンド
-    var counterView: CounterViewAction? {
+    var counterView: CounterFeatureAction? {
         get {
             guard case let .counterView(value) = self else { return nil }
             return value
@@ -81,7 +81,7 @@ enum AppAction: Equatable {
     }
 
     /// enumでKeyPathを取得するためのワークアラウンド
-    var offlineCounterView: CounterViewAction? {
+    var offlineCounterView: CounterFeatureAction? {
         get {
             guard case let .offlineCounterView(value) = self else { return nil }
             return value
@@ -145,13 +145,13 @@ let appReducer: Reducer<AppState, AppAction, AppEnvironment> = combine(
 /// 大元のView
 struct ContentView: View {
 
-    @ObservedObject var store: Store<AppState, AppAction>
+    let store: Store<AppState, AppAction>
 
     var body: some View {
         NavigationView {
             List {
                 NavigationLink {
-                    CounterView(store: store.view(
+                    CounterView(store: store.scope(
                         value: { $0.counterViewState },
                         action: { .counterView($0) }
                     ))
@@ -159,7 +159,7 @@ struct ContentView: View {
                     Text("Counter demo")
                 }
                 NavigationLink {
-                    CounterView(store: store.view(
+                    CounterView(store: store.scope(
                         value: { $0.counterViewState },
                         action: { .offlineCounterView($0) }
                     ))
@@ -167,7 +167,7 @@ struct ContentView: View {
                     Text("Offline counter demo")
                 }
                 NavigationLink {
-                    FavoritesView(store: store.view(
+                    FavoritesView(store: store.scope(
                         value: { $0.favoritePrimesState },
                         action: { .favorite($0) }
                     ))
