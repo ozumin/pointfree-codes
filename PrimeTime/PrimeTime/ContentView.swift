@@ -174,6 +174,9 @@ struct ContentView: View {
                 } label: {
                     Text("Favorite primes")
                 }
+                ForEach(1..<50_000) { number in
+                    Text("\(number)")
+                }
             }
             .navigationTitle("State management")
         }

@@ -27,12 +27,12 @@ final class PrimeTimeTests: XCTestCase {
             reducer: appReducer,
             environment: (nthPrime: { _ in .sync { 17 } }, offlineNthPrime: { _ in .sync { 17 } }, fileClient: .mock),
             steps:
-                Step(.send, .counterView(.counter(.nthPrimeButtonTapped(2)))) {
-                    $0.isNthPrimeButtonDisabled = true
+                Step(.send, .counterView(.counter(.nthPrimeRequest(2)))) {
+                    $0.isNthPrimeRequestInFlight = true
                 },
             Step(.receive, .counterView(.counter(.nthPrimeResponse(2, 17)))) {
                 $0.alertNthPrime = .init(n: 2, prime: 17)
-                $0.isNthPrimeButtonDisabled = false
+                $0.isNthPrimeRequestInFlight = false
             },
             Step(.send, .counterView(.counter(.alertDismissButtonTapped))) {
                 $0.alertNthPrime = nil

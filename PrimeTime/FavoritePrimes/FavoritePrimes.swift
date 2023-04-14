@@ -111,7 +111,7 @@ extension FileClient {
 public struct FavoritesView : View {
 
     let store: Store<FavoritePrimesState, FavoriteAction>
-    @ObservedObject var viewStore: ViewStore<FavoritePrimesState>
+    @ObservedObject var viewStore: ViewStore<FavoritePrimesState, FavoriteAction>
 
     public init(store: Store<FavoritePrimesState, FavoriteAction>) {
         self.store = store
@@ -122,13 +122,13 @@ public struct FavoritesView : View {
         List {
             ForEach(viewStore.value.favoritePrimes, id: \.self) { prime in
                 Button {
-                    store.send(.primeButtonTapped(prime))
+                    viewStore.send(.primeButtonTapped(prime))
                 } label: {
                     Text("\(prime)")
                 }
                 .swipeActions {
                     Button("Delete") {
-                        store.send(.removeFromFavorite(prime))
+                        viewStore.send(.removeFromFavorite(prime))
                     }
                     .tint(.red)
                 }
@@ -137,12 +137,12 @@ public struct FavoritesView : View {
         .navigationBarTitle("Favorite primes")
         .navigationBarItems(trailing: HStack {
             Button {
-                self.store.send(.saveButtonTapped)
+                self.viewStore.send(.saveButtonTapped)
             } label: {
                 Text("Save")
             }
             Button {
-                self.store.send(.loadButtonTapped)
+                self.viewStore.send(.loadButtonTapped)
             } label: {
                 Text("Load")
             }
@@ -153,7 +153,7 @@ public struct FavoritesView : View {
             Alert(
                 title: Text(alert.title),
                 dismissButton: .default(Text("Ok")) {
-                    self.store.send(.alertDismissButtonTapped)
+                    self.viewStore.send(.alertDismissButtonTapped)
                 }
             )
         }

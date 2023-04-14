@@ -84,12 +84,14 @@ public func combine<Value, Action, Environment>(
     }
 }
 
-public final class ViewStore<Value>: ObservableObject {
+public final class ViewStore<Value, Action>: ObservableObject {
     @Published public fileprivate(set) var value: Value
     fileprivate var cancellable: Cancellable?
+    public let send: (Action) -> Void
 
-    public init(initialValue: Value) {
+    public init(initialValue: Value, send: @escaping (Action) -> Void) {
         self.value = initialValue
+        self.send = send
     }
 }
 
@@ -150,18 +152,17 @@ public final class Store<Value, Action> {
 }
 
 extension Store {
-    public func view(removeDuplicates predicate: @escaping (Value, Value) -> Bool) -> ViewStore<Value> {
-        let viewStore = ViewStore(initialValue: self.value)
+    public func view(removeDuplicates predicate: @escaping (Value, Value) -> Bool) -> ViewStore<Value, Action> {
+        let viewStore = ViewStore(initialValue: self.value, send: self.send)
         viewStore.cancellable = self.$value.sink(receiveValue: { [weak viewStore] newValue in
             viewStore?.value = newValue
-            self
         })
         return viewStore
     }
 }
 
 extension Store where Value: Equatable {
-    public var view: ViewStore<Value> {
+    public var view: ViewStore<Value, Action> {
         self.view(removeDuplicates: ==)
       }
 }
