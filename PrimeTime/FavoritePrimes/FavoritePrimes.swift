@@ -134,19 +134,21 @@ public struct FavoritesView : View {
                 }
             }
         }
-        .navigationBarTitle("Favorite primes")
-        .navigationBarItems(trailing: HStack {
-            Button {
-                self.viewStore.send(.saveButtonTapped)
-            } label: {
-                Text("Save")
+        .navigationTitle("Favorite primes")
+        .toolbar {
+            ToolbarItemGroup {
+                Button {
+                    self.viewStore.send(.saveButtonTapped)
+                } label: {
+                    Text("Save")
+                }
+                Button {
+                    self.viewStore.send(.loadButtonTapped)
+                } label: {
+                    Text("Load")
+                }
             }
-            Button {
-                self.viewStore.send(.loadButtonTapped)
-            } label: {
-                Text("Load")
-            }
-        })
+        }
         .alert(
             item: .constant(self.store.value.alertNthPrime)
         ) { alert in
