@@ -22,7 +22,7 @@ public enum FavoriteAction: Equatable {
 }
 
 /// FavoriteViewで使うreducer
-public func favoriteReducer(value: inout FavoritePrimesState, action: FavoriteAction, environment: FavoritePrimesEnvironment) -> [Effect<FavoriteAction>] {
+public let favoriteReducer = Reducer<FavoritePrimesState, FavoriteAction, FavoritePrimesEnvironment> { value, action, environment in
     switch action {
     case .removeFromFavorite(let number):
         value.favoritePrimes.removeAll(where: { $0 == number })

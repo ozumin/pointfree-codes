@@ -16,7 +16,7 @@ struct PrimeTimeApp: App {
             ContentView(
                 store: Store<AppState, AppAction>(
                     value: AppState(),
-                    reducer: logging(activityFeed(appReducer)),
+                    reducer: appReducer.activityFeed().logging(),
                     environment: AppEnvironment(
                         nthPrime: nthPrime,
                         offlineNthPrime: offlineNthPrime,

@@ -39,13 +39,13 @@ public struct PrimeAlert: Equatable, Identifiable {
     }
 }
 
-public let counterViewReducer: Reducer<CounterFeatureState, CounterFeatureAction, CounterEnvironment> = combine(
-    pullBack(counterReducer, value: \CounterFeatureState.counter, action: \.counter, environment: { $0 }),
-    pullBack(primeResultReducer, value: \.primeModal, action: \.primeResult, environment: { _ in })
+public let counterViewReducer: Reducer<CounterFeatureState, CounterFeatureAction, CounterEnvironment> = Reducer.combine(
+    counterReducer.pullback(value: \CounterFeatureState.counter, action: \.counter, environment: { $0 }),
+    primeResultReducer.pullback(value: \.primeModal, action: \.primeResult, environment: { _ in })
 )
 
 /// CounterViewでのreducer
-public func counterReducer(value: inout CounterState, action: CounterAction, environment: CounterEnvironment) -> [Effect<CounterAction>] {
+public let counterReducer = Reducer<CounterState, CounterAction, CounterEnvironment> {value, action, environment in
     switch action {
     case .decreaseNumber:
         value.targetNumber -= 1

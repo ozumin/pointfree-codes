@@ -50,37 +50,50 @@ extension Publisher where Output == Never, Failure == Never {
     }
 }
 
-public typealias Reducer<Value, Action, Environment> = (inout Value, Action, Environment) -> [Effect<Action>]
+public struct Reducer<Value, Action, Environment> {
+    let reducer: (inout Value, Action, Environment) -> [Effect<Action>]
 
-/// Reducerの必要な部分だけ取り出す関数
-/// GlobalValueの一部をLocalValueとして、GlobalActionの一部をLocalActionとしてreducerに渡している
-public func pullBack<LocalValue, GlobalValue, GlobalAction, LocalAction, GlobalEnvironment, LocalEnvironment>(
-    _ localReducer: @escaping Reducer<LocalValue, LocalAction, LocalEnvironment>,
-    value: WritableKeyPath<GlobalValue, LocalValue>,
-    action: WritableKeyPath<GlobalAction, LocalAction?>,
-    environment: @escaping (GlobalEnvironment) -> LocalEnvironment
-) -> Reducer<GlobalValue, GlobalAction, GlobalEnvironment> {
-    return { globalValue, globalAction, globalEnvironment in
-        guard let localAction = globalAction[keyPath: action] else { return [] }
-        let localEffects = localReducer(&globalValue[keyPath: value], localAction, environment(globalEnvironment))
-        return localEffects.map { localEffect in
-            localEffect
-                .map { localAction in
-                    var globalAction = globalAction
-                    globalAction[keyPath: action] = localAction
-                    return globalAction
-                }
-                .eraseToEffect()
+    public init(_ reducer: @escaping (inout Value, Action, Environment) -> [Effect<Action>]) {
+        self.reducer = reducer
+    }
+}
+
+extension Reducer {
+    public func callAsFunction(_ value: inout Value, _ action: Action, _ environment: Environment) -> [Effect<Action>] {
+        self.reducer(&value, action, environment)
+    }
+}
+
+extension Reducer {
+    /// Reducerの必要な部分だけ取り出す関数
+    /// GlobalValueの一部をLocalValueとして、GlobalActionの一部をLocalActionとしてreducerに渡している
+    public func pullback<GlobalValue, GlobalAction, GlobalEnvironment>(
+        value: WritableKeyPath<GlobalValue, Value>,
+        action: WritableKeyPath<GlobalAction, Action?>,
+        environment: @escaping (GlobalEnvironment) -> Environment
+    ) -> Reducer<GlobalValue, GlobalAction, GlobalEnvironment> {
+        .init { globalValue, globalAction, globalEnvironment in
+            guard let localAction = globalAction[keyPath: action] else { return [] }
+            let localEffects = self(&globalValue[keyPath: value], localAction, environment(globalEnvironment))
+            return localEffects.map { localEffect in
+                localEffect
+                    .map { localAction in
+                        var globalAction = globalAction
+                        globalAction[keyPath: action] = localAction
+                        return globalAction
+                    }
+                    .eraseToEffect()
+            }
         }
     }
 }
 
-/// Reducerをまとめ上げる関数
-public func combine<Value, Action, Environment>(
-    _ reducers: Reducer<Value, Action, Environment>...
-) -> Reducer<Value, Action, Environment> {
-    return { value, action, environment in
-        return reducers.flatMap { $0(&value, action, environment) }
+extension Reducer {
+    /// Reducerをまとめ上げる関数
+    public static func combine(_ reducers: Reducer...) -> Reducer {
+        .init { value, action, environment in
+            return reducers.flatMap { $0(&value, action, environment) }
+        }
     }
 }
 
@@ -104,8 +117,8 @@ public final class Store<Value, Action> {
     private var viewCancellable: Cancellable?
     private var effectCancellables: Set<AnyCancellable> = []
 
-    public init<Environment>(value: Value, reducer: @escaping Reducer<Value, Action, Environment>, environment: Environment) {
-        self.reducer = { value, action, environment in
+    public init<Environment>(value: Value, reducer: Reducer<Value, Action, Environment>, environment: Environment) {
+        self.reducer = .init { value, action, environment in
             reducer(&value, action, environment as! Environment)
         }
         self.value = value
@@ -137,7 +150,7 @@ public final class Store<Value, Action> {
     ) -> Store<LocalValue, LocalAction> {
         let store: Store<LocalValue, LocalAction> = .init(
             value: toLocalValue(self.value),
-            reducer: { localValue, localAction, _ in
+            reducer: .init { localValue, localAction, _ in
                 self.send(toGlobalAction(localAction))
                 localValue = toLocalValue(self.value)
                 return []
@@ -167,19 +180,24 @@ extension Store where Value: Equatable {
       }
 }
 
-public func logging<Value, Action, Environment>(
-    _ reducer: @escaping Reducer<Value, Action, Environment>
-) -> Reducer<Value, Action, Environment> {
-    return { value, action, environment in
-        let effects = reducer(&value, action, environment)
-        let newValue = value
-        return [
-            .fireAndForget {
-                print("Action: \(action)")
-                print("Value:")
-                dump(newValue)
-                print("---")
-            }
-        ] + effects
+extension Reducer {
+    public func logging(
+        printer: @escaping (Environment) -> (String) -> Void = { _ in { print($0) } }
+    ) -> Reducer {
+        .init { value, action, environment in
+            let effects = self(&value, action, environment)
+            let newValue = value
+            let print = printer(environment)
+            return [
+                .fireAndForget {
+                    print("Action: \(action)")
+                    print("Value:")
+                    var dumpedNewValue = ""
+                    dump(newValue, to: &dumpedNewValue)
+                    print(dumpedNewValue)
+                    print("---")
+                }
+            ] + effects
+        }
     }
 }

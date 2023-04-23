@@ -111,35 +111,37 @@ typealias AppEnvironment = (
     fileClient: FileClient
 )
 
-func activityFeed(_ reducer: @escaping Reducer<AppState, AppAction, AppEnvironment>) -> Reducer<AppState, AppAction, AppEnvironment> {
-    { value, action, environment in
-        switch action {
-        case
-                .counterView(.counter(_)),
-                .offlineCounterView(.counter(_)),
-                .favorite(.loadedFavoritePrimes(_)),
-                .favorite(.saveButtonTapped),
-                .favorite(.loadButtonTapped),
-                .favorite(.nthPrimeResponse),
-                .favorite(.primeButtonTapped),
-                .favorite(.alertDismissButtonTapped):
-            break
-        case .counterView(.primeResult(.addToFavorite)), .offlineCounterView(.primeResult(.addToFavorite)):
-            value.activityFeed.append(.init(timestamp: .now, type: .addedFavoritePrime(value.targetNumber)))
-        case .counterView(.primeResult(.removeFromFavorite)), .offlineCounterView(.primeResult(.removeFromFavorite)):
-            value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(value.targetNumber)))
-        case let .favorite(.removeFromFavorite(number)):
-            value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(number)))
+extension Reducer where Value == AppState, Action == AppAction, Environment == AppEnvironment {
+    func activityFeed() -> Reducer {
+        .init { value, action, environment in
+            switch action {
+            case
+                    .counterView(.counter(_)),
+                    .offlineCounterView(.counter(_)),
+                    .favorite(.loadedFavoritePrimes(_)),
+                    .favorite(.saveButtonTapped),
+                    .favorite(.loadButtonTapped),
+                    .favorite(.nthPrimeResponse),
+                    .favorite(.primeButtonTapped),
+                    .favorite(.alertDismissButtonTapped):
+                break
+            case .counterView(.primeResult(.addToFavorite)), .offlineCounterView(.primeResult(.addToFavorite)):
+                value.activityFeed.append(.init(timestamp: .now, type: .addedFavoritePrime(value.targetNumber)))
+            case .counterView(.primeResult(.removeFromFavorite)), .offlineCounterView(.primeResult(.removeFromFavorite)):
+                value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(value.targetNumber)))
+            case let .favorite(.removeFromFavorite(number)):
+                value.activityFeed.append(.init(timestamp: .now, type: .removedFavoritePrime(number)))
+            }
+            return self(&value, action, environment)
         }
-        return reducer(&value, action, environment)
     }
 }
 
 /// アプリで使うreducer
-let appReducer: Reducer<AppState, AppAction, AppEnvironment> = combine(
-    pullBack(counterViewReducer, value: \.counterViewState, action: \.counterView, environment: { $0.nthPrime }),
-    pullBack(counterViewReducer, value: \.counterViewState, action: \.offlineCounterView, environment: { $0.offlineNthPrime }),
-    pullBack(favoriteReducer, value: \.favoritePrimesState, action: \.favorite, environment: { (fileClient: $0.fileClient, nthPrime: nthPrime) })
+let appReducer: Reducer<AppState, AppAction, AppEnvironment> = Reducer.combine(
+    counterViewReducer.pullback(value: \.counterViewState, action: \.counterView, environment: { $0.nthPrime }),
+    counterViewReducer.pullback(value: \.counterViewState, action: \.offlineCounterView, environment: { $0.offlineNthPrime }),
+    favoriteReducer.pullback(value: \.favoritePrimesState, action: \.favorite, environment: { (fileClient: $0.fileClient, nthPrime: nthPrime) })
 )
 
 /// 大元のView
@@ -188,7 +190,7 @@ struct ContentView_Previews: PreviewProvider {
         ContentView(
             store: Store<AppState, AppAction>(
                 value: AppState(),
-                reducer: logging(activityFeed(appReducer)),
+                reducer: appReducer.activityFeed().logging(),
                 environment: AppEnvironment(nthPrime: nthPrime, offlineNthPrime: offlineNthPrime, fileClient: .live)
             )
         )
