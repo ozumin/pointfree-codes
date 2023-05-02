@@ -16,12 +16,15 @@ public enum CounterAction: Equatable {
     case nthPrimeRequest(Int)
     case nthPrimeResponse(Int, Int?)
     case alertDismissButtonTapped
+    case primeDetailDismissed
+    case isPrimeButtonTapped
 }
 
 public typealias CounterState = (
     alertNthPrime: PrimeAlert?,
     targetNumber: Int,
-    isNthPrimeButtonDisabled: Bool
+    isNthPrimeButtonDisabled: Bool,
+    isPrimeDetailShown: Bool
 )
 
 public struct PrimeAlert: Equatable, Identifiable {
@@ -68,6 +71,12 @@ public let counterReducer = Reducer<CounterState, CounterAction, CounterEnvironm
     case .alertDismissButtonTapped:
         value.alertNthPrime = nil
         return []
+    case .primeDetailDismissed:
+        value.isPrimeDetailShown = false
+        return []
+    case .isPrimeButtonTapped:
+        value.isPrimeDetailShown = true
+        return []
     }
 }
 
@@ -76,22 +85,25 @@ public struct CounterFeatureState: Equatable {
     public var targetNumber: Int
     public var favoritePrimes: [Int]
     public var isNthPrimeRequestInFlight: Bool
+    public var isPrimeDetailShown: Bool
 
     public init(
         alertNthPrime: PrimeAlert? = nil,
         targetNumber: Int = 0,
         favoritePrimes: [Int] = [],
-        isNthPrimeRequestInFlight: Bool = false
+        isNthPrimeRequestInFlight: Bool = false,
+        isPrimeDetailShown: Bool = false
     ) {
         self.alertNthPrime = alertNthPrime
         self.targetNumber = targetNumber
         self.favoritePrimes = favoritePrimes
         self.isNthPrimeRequestInFlight = isNthPrimeRequestInFlight
+        self.isPrimeDetailShown = isPrimeDetailShown
     }
 
     var counter: CounterState {
-        get { (self.alertNthPrime, self.targetNumber, self.isNthPrimeRequestInFlight) }
-        set { (self.alertNthPrime, self.targetNumber, self.isNthPrimeRequestInFlight) = newValue }
+        get { (self.alertNthPrime, self.targetNumber, self.isNthPrimeRequestInFlight, self.isPrimeDetailShown) }
+        set { (self.alertNthPrime, self.targetNumber, self.isNthPrimeRequestInFlight, self.isPrimeDetailShown) = newValue }
     }
 
     var primeModal: PrimeModalState {

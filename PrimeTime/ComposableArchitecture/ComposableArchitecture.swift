@@ -6,6 +6,7 @@
 //
 
 import Combine
+import SwiftUI
 import Foundation
 
 public struct Effect<Output>: Publisher {
@@ -97,14 +98,39 @@ extension Reducer {
     }
 }
 
+@dynamicMemberLookup
 public final class ViewStore<Value, Action>: ObservableObject {
     @Published public fileprivate(set) var value: Value
     fileprivate var cancellable: Cancellable?
     public let send: (Action) -> Void
 
+    public subscript<LocalValue>(dynamicMember keypath: KeyPath<Value, LocalValue>) -> LocalValue {
+        self.value[keyPath: keypath]
+    }
+
     public init(initialValue: Value, send: @escaping (Action) -> Void) {
         self.value = initialValue
         self.send = send
+    }
+
+    public func binding<LocalValue>(
+        get: @escaping (Value) -> LocalValue,
+        send toAction: @escaping (LocalValue) -> Action
+    ) -> Binding<LocalValue> {
+        Binding(
+            get: { get(self.value) },
+            set: { self.send(toAction($0)) }
+        )
+    }
+
+    public func binding<LocalValue>(
+        get: @escaping (Value) -> LocalValue,
+        send action: Action
+    ) -> Binding<LocalValue> {
+        Binding(
+            get: { get(self.value) },
+            set: { _ in self.send(action) }
+        )
     }
 }
 

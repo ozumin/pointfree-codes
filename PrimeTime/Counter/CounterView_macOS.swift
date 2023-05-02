@@ -28,6 +28,7 @@ public struct CounterView: View {
         case decrementButtonTapped
         case nthPrimeButtonTapped(Int)
         case alertDismissButtonTapped
+        case primePopoverDismissed
     }
 
     let store: Store<CounterFeatureState, CounterFeatureAction>
@@ -49,14 +50,14 @@ public struct CounterView: View {
                 } label: {
                     Text("-")
                 }
-                .disabled(self.viewStore.value.isDecrementButtonDisabled)
+                .disabled(self.viewStore.isDecrementButtonDisabled)
                 Text("\(viewStore.value.targetNumber)")
                 Button {
                     viewStore.send(.incrementButtonTapped)
                 } label: {
                     Text("+")
                 }
-                .disabled(self.viewStore.value.isIncrementButtonDisabled)
+                .disabled(self.viewStore.isIncrementButtonDisabled)
             }
             Button {
                 showResultSheet = true
@@ -68,11 +69,14 @@ public struct CounterView: View {
             } label: {
                 Text(viewStore.value.nthPrimeButtonTitle)
             }
-            .disabled(self.viewStore.value.isNthPrimeButtonDisabled)
+            .disabled(self.viewStore.isNthPrimeButtonDisabled)
             Spacer()
         }
         .navigationTitle("Counter demo")
-        .popover(isPresented: .constant(viewStore.value.isPrimePopoverShown)) {
+        .popover(isPresented: self.viewStore.binding(
+            get: \.isPrimePopoverShown,
+            send: .primePopoverDismissed
+        )) {
             PrimeResultView(
                 store: store.scope(
                     value: { $0.primeModal },
@@ -81,7 +85,7 @@ public struct CounterView: View {
             )
         }
         .alert(
-            item: .constant(self.viewStore.value.alertNthPrime)
+            item: .constant(self.viewStore.alertNthPrime)
         ) { alert in
             Alert(
                 title: Text(alert.title),
@@ -116,6 +120,8 @@ extension CounterFeatureAction {
             self = .counter(.increaseNumber)
         case .nthPrimeButtonTapped(let n):
             self = .counter(.nthPrimeRequest(n))
+        case .primePopoverDismissed:
+            self = .counter(.primeDetailDismissed)
         }
     }
 }

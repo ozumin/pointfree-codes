@@ -29,6 +29,8 @@ public struct CounterView: View {
         case nthPrimeButtonTapped(Int)
         case alertDismissButtonTapped
         case doubleTapped(Int)
+        case primeModalDismissed
+        case isPrimeButtonTapped
     }
 
     let store: Store<CounterFeatureState, CounterFeatureAction>
@@ -50,17 +52,17 @@ public struct CounterView: View {
                 } label: {
                     Text("-")
                 }
-                .disabled(self.viewStore.value.isDecrementButtonDisabled)
+                .disabled(self.viewStore.isDecrementButtonDisabled)
                 Text("\(viewStore.value.targetNumber)")
                 Button {
                     viewStore.send(.incrementButtonTapped)
                 } label: {
                     Text("+")
                 }
-                .disabled(self.viewStore.value.isIncrementButtonDisabled)
+                .disabled(self.viewStore.isIncrementButtonDisabled)
             }
             Button {
-                showResultSheet = true
+                self.viewStore.send(.isPrimeButtonTapped)
             } label: {
                 Text("Is this prime?")
             }
@@ -69,11 +71,16 @@ public struct CounterView: View {
             } label: {
                 Text(viewStore.value.nthPrimeButtonTitle)
             }
-            .disabled(self.viewStore.value.isNthPrimeButtonDisabled)
+            .disabled(self.viewStore.isNthPrimeButtonDisabled)
             Spacer()
         }
         .navigationTitle("Counter demo")
-        .sheet(isPresented: .constant(viewStore.value.isPrimeModalShown)) {
+        .sheet(
+            isPresented: self.viewStore.binding(
+                get: \.isPrimeModalShown,
+                send: .primeModalDismissed
+            )
+        ) {
             PrimeResultView(
                 store: store.scope(
                     value: { $0.primeModal },
@@ -82,7 +89,10 @@ public struct CounterView: View {
             )
         }
         .alert(
-            item: .constant(self.viewStore.value.alertNthPrime)
+            item: self.viewStore.binding(
+                get: \.alertNthPrime,
+                send: .alertDismissButtonTapped
+            )
         ) { alert in
             Alert(
                 title: Text(alert.title),
@@ -124,6 +134,10 @@ extension CounterFeatureAction {
             self = .counter(.nthPrimeRequest(n))
         case .nthPrimeButtonTapped(let n):
             self = .counter(.nthPrimeRequest(n))
+        case .primeModalDismissed:
+            self = .counter(.primeDetailDismissed)
+        case .isPrimeButtonTapped:
+            self = .counter(.isPrimeButtonTapped)
         }
     }
 }

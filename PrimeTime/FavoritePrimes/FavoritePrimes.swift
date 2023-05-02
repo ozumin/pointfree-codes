@@ -150,14 +150,12 @@ public struct FavoritesView : View {
             }
         }
         .alert(
-            item: .constant(self.store.value.alertNthPrime)
-        ) { alert in
-            Alert(
-                title: Text(alert.title),
-                dismissButton: .default(Text("Ok")) {
-                    self.viewStore.send(.alertDismissButtonTapped)
-                }
+            item: self.viewStore.binding(
+                get: \.alertNthPrime,
+                send: .alertDismissButtonTapped
             )
+        ) { alert in
+            Alert(title: Text(alert.title))
         }
     }
 }
