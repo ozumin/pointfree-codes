@@ -14,8 +14,12 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/pointfreeco/swift-navigation", from: "2.0.0"),
         .package(url: "https://github.com/pointfreeco/swift-perception", from: "1.0.0"),
+        .package(url: "https://github.com/swiftwasm/carton", from: "1.0.0"),
     ],
     targets: [
+        .executableTarget(
+            name: "WasmApp"
+        ),
         .target(
             name: "Counter",
             dependencies: [
@@ -24,5 +28,5 @@ let package = Package(
             ]
         ),
     ],
-    swiftLanguageModes: [.v6]
+    swiftLanguageVersions: [.v6]
 )
