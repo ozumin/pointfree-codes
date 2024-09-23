@@ -6,9 +6,27 @@
 //
 
 import Counter
+import FactClientLive
 import JavaScriptEventLoop
 import JavaScriptKit
 import SwiftNavigation
+import IssueReporting
+
+struct JavaScriptConsoleWarning: IssueReporter {
+    func reportIssue(
+        _ message: @autoclosure () -> String?,
+        fileID: StaticString,
+        filePath: StaticString,
+        line: UInt,
+        column: UInt
+    ) {
+        #if DEBUG
+        _ = JSObject.global.console.warn("""
+        \(fileID):\(line) - \(message() ?? "")
+        """)
+        #endif
+    }
+}
 
 @main
 @MainActor
@@ -16,6 +34,8 @@ struct App {
     static var tokens: Set<ObserveToken> = []
 
     static func main() {
+        IssueReporters.current = [JavaScriptConsoleWarning()]
+
         JavaScriptEventLoop.installGlobalExecutor()
 
         let model = CounterModel()
@@ -46,8 +66,29 @@ struct App {
         )
         _ = document.body.appendChild(incrementButton)
 
+        var factButton = document.createElement("button")
+        factButton.innerText = "Get fact"
+        factButton.onclick = .object(
+            JSClosure { _ in
+                Task { await model.factButtonTapped() }
+                return .undefined
+            }
+        )
+        _ = document.body.appendChild(factButton)
+
+        var factLabel = document.createElement("div")
+        _ = document.body.appendChild(factLabel)
+
+
         observe {
             countLabel.innerText = .string("Count: \(model.count)")
+            if let fact = model.fact?.value {
+                factLabel.innerText = .string(fact)
+            } else if model.factIsLoading {
+                factLabel.innerText = "Fact is loading..."
+            } else {
+                factLabel.innerText = ""
+            }
         }
         .store(in: &tokens)
     }

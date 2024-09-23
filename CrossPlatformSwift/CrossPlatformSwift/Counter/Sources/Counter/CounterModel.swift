@@ -1,10 +1,16 @@
 import Foundation
 import Perception
 import SwiftNavigation
+import Dependencies
+import FactClient
 
 @MainActor
 @Perceptible
 public class CounterModel: HashableObject {
+
+    @PerceptionIgnored
+    @Dependency(FactClient.self) var factClient
+
   public var count = 0 {
     didSet {
       isTextFocused = !count.isMultiple(of: 3)
@@ -38,15 +44,10 @@ public class CounterModel: HashableObject {
     defer { factIsLoading = false }
 
     do {
-      try await Task.sleep(for: .seconds(1))
-//      let loadedFact = try await String(
-//        decoding: URLSession.shared
-//          .data(
-//            from: URL(string: "http://www.numberapi.com/\(count)")!
-//          ).0,
-//        as: UTF8.self
-//      )
-//      fact = Fact(value: loadedFact)
+        try await Task.sleep(for: .seconds(1))
+        var count = count
+        let fact = try await factClient.fetch(count)
+        self.fact = Fact(value: fact)
     } catch {
       // TODO: error handling
     }
