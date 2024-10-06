@@ -19,13 +19,17 @@ public class CounterModel: HashableObject {
 
     public var alert: AlertState<Never>?
     //  public var fact: Fact? {
-//    didSet {
-//        print("Fact didset")
-//    }
-//}
-  public var factIsLoading = false
-  public var isTextFocused = false
-  public var text = ""
+    //    didSet {
+    //        print("Fact didset")
+    //    }
+    //}
+    public var factIsLoading = false
+    public var isTextFocused = false {
+        didSet { print ("textFocused", isTextFocused) }
+    }
+    public var text = "" {
+        didSet { print("text changed", text) }
+    }
 
   public struct Fact: Identifiable {
     public var value: String

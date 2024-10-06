@@ -133,3 +133,116 @@ func alertDialog<Action: Sendable>(
         }
     }
 }
+
+import IssueReporting
+
+extension JSValue {
+    @MainActor
+    func bind<Value: JSValueCompatible>(
+        _ binding: UIBinding<Value>,
+        to keyPath: ReferenceWritableKeyPath<JSObject, JSValue>,
+        event: ReferenceWritableKeyPath<JSObject, JSValue>,
+        fileID: StaticString = #fileID,
+        filePath: StaticString = #filePath,
+        line: UInt = #line,
+        column: UInt = #column
+    ) -> ObserveToken {
+        guard let object else {
+            reportIssue(
+                "Bind only works on objects",
+                fileID: #fileID,
+                filePath: #filePath,
+                line: #line,
+                column: #column
+            )
+            return ObserveToken()
+        }
+
+        object[keyPath: event] = .object(
+            JSClosure { arguments in
+                let jsValue = object[keyPath: keyPath]
+                guard let value = Value.construct(from: jsValue) else {
+                    reportIssue(
+                        "Could not convert \(jsValueDescription(jsValue)) to \(Value.self)",
+                        fileID: #fileID,
+                        filePath: #filePath,
+                        line: #line,
+                        column: #column
+                    )
+                    return .undefined
+                }
+                binding.wrappedValue = value
+                return .undefined
+            }
+        )
+
+        return observe {
+            object[keyPath: keyPath] = binding.wrappedValue.jsValue
+        }
+    }
+
+    @MainActor
+    func bind(
+        focus binding: UIBinding<Bool>,
+        fileID: StaticString = #fileID,
+        filePath: StaticString = #filePath,
+        line: UInt = #line,
+        column: UInt = #column
+    ) -> ObserveToken {
+        guard let object else {
+            reportIssue(
+                "Bind only works on objects",
+                fileID: #fileID,
+                filePath: #filePath,
+                line: #line,
+                column: #column
+            )
+            return ObserveToken()
+        }
+
+        object.onfocus = .object(
+            JSClosure { _ in
+                binding.wrappedValue = true
+                return .undefined
+            }
+        )
+
+        object.onblur = .object(
+            JSClosure { _ in
+                binding.wrappedValue = false
+                return .undefined
+            }
+        )
+
+        return observe {
+            if binding.wrappedValue {
+                _ = object.focus?()
+            } else {
+                _ = object.blur?()
+            }
+        }
+    }
+}
+
+func jsValueDescription(_ value: JSValue) -> String {
+    switch value {
+    case .boolean(let value):
+        return "JSValue.boolean(\(value))"
+    case .string(let value):
+        return "JSValue.string(\"\(value)\")"
+    case .number(let value):
+        return "JSValue.number(\(value))"
+    case .object(let value):
+        return "JSValue.object(\(value))"
+    case .null:
+        return "JSValue.null"
+    case .undefined:
+        return "JSValue.undefined"
+    case .function(let value):
+        return "JSValue.function(\(value))"
+    case .symbol(let value):
+        return "JSValue.symbol(\(value))"
+    case .bigInt(let value):
+        return "JSValue.bigInt(\(value))"
+    }
+}
