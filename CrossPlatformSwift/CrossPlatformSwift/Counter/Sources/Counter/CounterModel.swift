@@ -11,12 +11,18 @@ public class CounterModel: HashableObject {
     @PerceptionIgnored
     @Dependency(FactClient.self) var factClient
 
-  public var count = 0 {
-    didSet {
-      isTextFocused = !count.isMultiple(of: 3)
+    public var count = 0 {
+        didSet {
+            isTextFocused = !count.isMultiple(of: 3)
+        }
     }
-  }
-  public var fact: Fact?
+
+    public var alert: AlertState<Never>?
+    //  public var fact: Fact? {
+//    didSet {
+//        print("Fact didset")
+//    }
+//}
   public var factIsLoading = false
   public var isTextFocused = false
   public var text = ""
@@ -30,16 +36,16 @@ public class CounterModel: HashableObject {
 
   public func incrementButtonTapped() {
     count += 1
-    fact = nil
+    alert = nil
   }
 
   public func decrementButtonTapped() {
     count -= 1
-    fact = nil
+      alert = nil
   }
 
   public func factButtonTapped() async {
-    fact = nil
+      alert = nil
     factIsLoading = true
     defer { factIsLoading = false }
 
@@ -47,7 +53,20 @@ public class CounterModel: HashableObject {
         try await Task.sleep(for: .seconds(1))
         var count = count
         let fact = try await factClient.fetch(count)
-        self.fact = Fact(value: fact)
+        alert = AlertState {
+            TextState("Fact")
+        } actions: {
+            ButtonState {
+                TextState("OK")
+            }
+            ButtonState {
+                TextState("Save")
+            }
+        } message: {
+            TextState(fact)
+        }
+//        try await Task.sleep(for: .seconds(1))
+//        self.fact = nil
     } catch {
       // TODO: error handling
     }

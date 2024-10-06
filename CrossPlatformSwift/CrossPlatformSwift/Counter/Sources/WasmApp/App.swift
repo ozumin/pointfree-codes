@@ -38,7 +38,7 @@ struct App {
 
         JavaScriptEventLoop.installGlobalExecutor()
 
-        let model = CounterModel()
+        @UIBindable var model = CounterModel()
 
         let document = JSObject.global.document
 
@@ -79,17 +79,27 @@ struct App {
         var factLabel = document.createElement("div")
         _ = document.body.appendChild(factLabel)
 
-
         observe {
             countLabel.innerText = .string("Count: \(model.count)")
-            if let fact = model.fact?.value {
-                factLabel.innerText = .string(fact)
-            } else if model.factIsLoading {
+            if model.factIsLoading {
                 factLabel.innerText = "Fact is loading..."
             } else {
                 factLabel.innerText = ""
             }
         }
         .store(in: &tokens)
+
+//        alert(item: $model.fact, message: \.value)
+//            .store(in: &tokens)
+
+//        alertDialog(item: $model.fact) { _ in
+//            "Fact"
+//        } message: { fact in
+//            fact.value
+//        }
+//        .store(in: &tokens)
+
+        alertDialog($model.alert)
+            .store(in: &tokens)
     }
 }
