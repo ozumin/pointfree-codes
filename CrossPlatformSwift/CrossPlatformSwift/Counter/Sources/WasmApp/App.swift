@@ -48,6 +48,16 @@ struct App {
         counter.bind($model.count.toString, to: \.value, event: \.onchange)
             .store(in: &tokens)
 
+
+      var toggleTimerButton = document.createElement("button")
+      toggleTimerButton.onclick = .object(
+        JSClosure { _ in
+          model.toggleTimerButtonTapped()
+          return .undefined
+        }
+      )
+      _ = document.body.appendChild(toggleTimerButton)
+
         var textField = document.createElement("input")
         textField.type = "text"
         _ = document.body.appendChild(textField)
@@ -70,6 +80,7 @@ struct App {
         _ = document.body.appendChild(factLabel)
 
         observe {
+          toggleTimerButton.innerText = model.isTimerRunning ? "Stop timer" : "Start timer"
             if model.factIsLoading {
                 factLabel.innerText = "Fact is loading..."
             } else {

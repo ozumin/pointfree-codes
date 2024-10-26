@@ -10,6 +10,8 @@ public class CounterModel: HashableObject {
 
     @PerceptionIgnored
     @Dependency(FactClient.self) var factClient
+    @PerceptionIgnored
+    @Dependency(\.continuousClock) var clock
 
     public var count = 0 {
         didSet {
@@ -30,6 +32,10 @@ public class CounterModel: HashableObject {
     public var text = "" {
         didSet { print("text changed", text) }
     }
+
+
+    private var timerTask: Task<Void, Error>?
+    public var isTimerRunning: Bool { timerTask != nil }
 
   public struct Fact: Identifiable {
     public var value: String
@@ -73,6 +79,19 @@ public class CounterModel: HashableObject {
 //        self.fact = nil
     } catch {
       // TODO: error handling
+    }
+  }
+
+  public func toggleTimerButtonTapped() {
+    timerTask?.cancel()
+    if isTimerRunning {
+      timerTask = nil
+    } else {
+      timerTask = Task {
+        for await _ in clock.timer(interval: .seconds(1)) {
+          count += 1
+        }
+      }
     }
   }
 }

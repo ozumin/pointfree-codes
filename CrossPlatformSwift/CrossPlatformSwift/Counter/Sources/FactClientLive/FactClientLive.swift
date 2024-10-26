@@ -6,18 +6,17 @@
 //
 
 import FactClient
+import Foundation
 import Dependencies
 import DependenciesMacros
-#if canImport(JavaScriptKit)
+#if os(WASI)
 @preconcurrency import JavaScriptKit
-#endif
-#if canImport(JavaScriptEventLoop)
 import JavaScriptEventLoop
 #endif
 
 extension FactClient: DependencyKey {
     public static let liveValue = FactClient { number in
-        #if canImport(JavaScriptKit) && canImport(JavaScriptEventLoop)
+        #if os(WASI)
         let response = try await JSPromise(
             JSObject.global.fetch!("http://www.numberapi.com/\(number)").object!
         )!.value
