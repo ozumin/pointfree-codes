@@ -13,6 +13,14 @@ let package = Package(
         .library(
             name: "FactClient",
             targets: ["FactClient"]
+        ),
+        .library(
+            name: "StorageClient",
+            targets: ["StorageClient"]
+        ),
+        .library(
+            name: "StorageClientLive",
+            targets: ["StorageClientLive"]
         )
     ],
     dependencies: [
@@ -28,6 +36,7 @@ let package = Package(
             dependencies: [
                 "Counter",
                 "FactClientLive",
+                "StorageClientLive",
                 .product(name: "SwiftNavigation", package: "swift-navigation"),
                 .product(name: "JavaScriptEventLoop", package: "JavaScriptKit"),
                 .product(name: "JavaScriptKit", package: "JavaScriptKit"),
@@ -37,6 +46,7 @@ let package = Package(
             name: "Counter",
             dependencies: [
                 "FactClient",
+                "StorageClient",
                 .product(name: "SwiftNavigation", package: "swift-navigation"),
                 .product(name: "Perception", package: "swift-perception")
             ]
@@ -54,6 +64,20 @@ let package = Package(
                 "FactClient",
                 .product(name: "JavaScriptKit", package: "JavaScriptKit", condition: .when(platforms: [.wasi])),
                 .product(name: "JavaScriptEventLoop", package: "JavaScriptKit", condition: .when(platforms: [.wasi])),
+            ]
+        ),
+        .target(
+            name: "StorageClient",
+            dependencies: [
+                .product(name: "Dependencies", package: "swift-dependencies"),
+                .product(name: "DependenciesMacros", package: "swift-dependencies"),
+            ]
+        ),
+        .target(
+            name: "StorageClientLive",
+            dependencies: [
+                "StorageClient",
+                .product(name: "JavaScriptKit", package: "JavaScriptKit", condition: .when(platforms: [.wasi])),
             ]
         )
     ],
