@@ -79,6 +79,12 @@ struct App {
         var factLabel = document.createElement("div")
         _ = document.body.appendChild(factLabel)
 
+      var factsHeader = document.createElement("h3")
+      factsHeader.innerText = "Saved facts"
+      _ = document.body.appendChild(factsHeader)
+
+      var factsTable = document.createElement("table")
+      _ = document.body.appendChild(factsTable)
         observe {
           toggleTimerButton.innerText = model.isTimerRunning ? "Stop timer" : "Start timer"
             if model.factIsLoading {
@@ -88,7 +94,35 @@ struct App {
             }
         }
         .store(in: &tokens)
+      observe {
+        factsHeader.hidden = .boolean(model.savedFacts.isEmpty)
+        _ = factsTable.querySelectorAll("tr").forEach(JSClosure { arguments in
+          _ = arguments.first?.remove()
+          return .undefined
+        })
+        for fact in model.savedFacts {
+          var row = document.createElement("tr")
+          _ = factsTable.appendChild(row)
 
+          var factColumn = document.createElement("td")
+          _ = row.appendChild(factColumn)
+          factColumn.innerText = .string(fact)
+
+          var deleteColumn = document.createElement("td")
+          _ = row.appendChild(deleteColumn)
+
+          var deleteButton = document.createElement("button")
+          deleteButton.innerText = "Delete"
+          deleteButton.onclick = .object(
+              JSClosure { _ in
+                Task { await model.deleteFactButtonTapped(fact: fact) }
+                  return .undefined
+              }
+          )
+          _ = deleteColumn.appendChild(deleteButton)
+        }
+      }
+      .store(in: &tokens)
 //        alert(item: $model.fact, message: \.value)
 //            .store(in: &tokens)
 
@@ -99,8 +133,10 @@ struct App {
 //        }
 //        .store(in: &tokens)
 
-        alertDialog($model.alert)
-            .store(in: &tokens)
+      alertDialog($model.alert) { action in
+        model.handle(alertAction: action)
+      }
+      .store(in: &tokens)
     }
 }
 

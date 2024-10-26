@@ -73,7 +73,7 @@ func alertDialog(
 @MainActor
 func alertDialog<Action: Sendable>(
     _ state: UIBinding<AlertState<Action>?>,
-    action handler: @escaping @Sendable (Action) -> Void
+    action handler: @escaping @Sendable @MainActor (Action) -> Void
 ) -> ObserveToken {
     let document = JSObject.global.document
 

@@ -19,7 +19,7 @@ public class CounterModel: HashableObject {
         }
     }
 
-    public var alert: AlertState<Never>?
+    public var alert: AlertState<Alert>?
     //  public var fact: Fact? {
     //    didSet {
     //        print("Fact didset")
@@ -29,6 +29,7 @@ public class CounterModel: HashableObject {
     public var isTextFocused = false {
         didSet { print ("textFocused", isTextFocused) }
     }
+  public var savedFacts: [String] = []
     public var text = "" {
         didSet { print("text changed", text) }
     }
@@ -36,6 +37,11 @@ public class CounterModel: HashableObject {
 
     private var timerTask: Task<Void, Error>?
     public var isTimerRunning: Bool { timerTask != nil }
+
+  public enum Alert: Sendable {
+    case saveFact(String)
+    case confirmDeleteFact(String)
+  }
 
   public struct Fact: Identifiable {
     public var value: String
@@ -66,10 +72,10 @@ public class CounterModel: HashableObject {
         alert = AlertState {
             TextState("Fact")
         } actions: {
-            ButtonState {
+            ButtonState(role: .cancel) {
                 TextState("OK")
             }
-            ButtonState {
+          ButtonState(action: .saveFact(fact)) {
                 TextState("Save")
             }
         } message: {
@@ -79,6 +85,30 @@ public class CounterModel: HashableObject {
 //        self.fact = nil
     } catch {
       // TODO: error handling
+    }
+  }
+
+  public func handle(alertAction: Alert) {
+    switch alertAction {
+    case .saveFact(let fact):
+      savedFacts.append(fact)
+    case .confirmDeleteFact(let fact):
+      savedFacts.removeAll(where: { $0 == fact })
+    }
+  }
+
+  public func deleteFactButtonTapped(fact: String) {
+    alert = AlertState {
+      TextState("Delete fact?")
+    } actions: {
+      ButtonState(role: .destructive, action: .confirmDeleteFact(fact)) {
+        TextState("Delete")
+      }
+      ButtonState(role: .cancel) {
+        TextState("Cancel")
+      }
+    } message: {
+      TextState(fact)
     }
   }
 
